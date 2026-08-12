@@ -65,7 +65,7 @@ incomplete evidence and edge cases are closed as cannot reproduce.
   `windows-capture`; ScreenCaptureKit through `screencapturekit-rs`; hardware
   H.264 via NVENC/QSV/AMF or VideoToolbox; bundled FFmpeg sidecar for muxing;
   `tauri-plugin-global-shortcut` for the trigger.
-- Package manager: Cargo for Rust; JavaScript package manager pending selection.
+- Package manager: Cargo for Rust and npm for JavaScript dependencies/scripts.
 - Runtime: a native local macOS desktop process for the MVP, with platform
   boundaries retained for later Windows support.
 - Data: rolling 10-second fragmented-MP4 segments plus local exports and

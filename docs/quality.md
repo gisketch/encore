@@ -13,12 +13,12 @@ Keep this as the project verification menu. Add commands only after they pass lo
 
 | Check | Command | Status |
 |---|---|---|
-| Bootstrap/install | Discover during setup | planned |
-| Run application | Discover during setup | planned |
-| Fast code checks | Discover during setup | planned |
-| Exercise primary behavior | Discover during setup | planned |
-| Observe failures | Discover during setup | planned |
-| Reset/cleanup | Discover during setup | planned |
+| Bootstrap/install | `npm install` | planned until the Tauri shell exists |
+| Run application | `npm run tauri dev` | planned until the Tauri shell exists |
+| Fast code checks | Define npm checks plus Rust formatting, linting, and tests with the shell | planned |
+| Exercise primary behavior | Define a local capture-retain-export smoke test at the public application seam | planned |
+| Observe failures | Define structured local logs for permissions, capture, retention, and export | planned |
+| Reset/cleanup | Define a safe command that clears disposable rolling segments but preserves saved exports | planned |
 
 ## Risk Lanes
 
