@@ -9,6 +9,12 @@ Keep this as the project verification menu. Add commands only after they pass lo
 | Harness structure and source size | `./scripts/check-sonata.sh` | After harness, docs, or skill changes |
 | Optional changed-code gates | `node scripts/check-quality-gates.mjs` | Before handoff when SCC or Skylos is enabled |
 
+SCC 3.7.0 is intentionally disabled during greenfield setup because no product
+source exists. Revisit it after the runnable Rust/TypeScript shell is created:
+install the pinned tool, run
+`node scripts/check-quality-gates.mjs --recommend-scc`, confirm the observed
+language-specific ceilings, and then enable the gate.
+
 ## Project Checks
 
 | Check | Command | Status |
