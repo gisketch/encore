@@ -5,8 +5,22 @@ Agent-legible project built with Sonata
 ## Start
 
 1. Read `AGENTS.md` and `docs/index.md`.
-2. Use `$sonata-setup` for greenfield work or `$sonata-retrofit` for an established codebase.
-3. Run `./scripts/check-sonata.sh`.
+2. Install dependencies with `npm install`.
+3. Launch the macOS shell with `npm run tauri dev`.
+
+The current shell is an honest interface preview. Screen capture, rolling
+storage, packaging, and the global shortcut are not implemented yet.
+
+## Verify
+
+```sh
+npm run check
+npm run build
+(cd src-tauri && cargo fmt --check)
+(cd src-tauri && cargo clippy --all-targets --all-features -- -D warnings)
+(cd src-tauri && cargo test)
+./scripts/check-sonata.sh --ready
+```
 
 ## Workflow
 

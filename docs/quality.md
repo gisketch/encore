@@ -9,9 +9,9 @@ Keep this as the project verification menu. Add commands only after they pass lo
 | Harness structure and source size | `./scripts/check-sonata.sh` | After harness, docs, or skill changes |
 | Optional changed-code gates | `node scripts/check-quality-gates.mjs` | Before handoff when SCC or Skylos is enabled |
 
-SCC 3.7.0 and Skylos 4.29.0 are intentionally disabled during greenfield setup
-because no product source exists. Revisit both after the runnable
-Rust/TypeScript shell is created. For SCC, install the pinned tool, run
+SCC 3.7.0 and Skylos 4.29.0 remain disabled until the post-shell quality-gate
+follow-up. Product source now exists, so that follow-up can install both pinned
+tools. For SCC, run
 `node scripts/check-quality-gates.mjs --recommend-scc`, and confirm the observed
 language-specific ceilings before enabling it. For Skylos, install the pinned
 tool and retain the project-owned strict defaults in `.sonata/skylos.toml` when
@@ -22,10 +22,11 @@ gate is enabled.
 
 | Check | Command | Status |
 |---|---|---|
-| Bootstrap/install | `npm install` | planned until the Tauri shell exists |
-| Run application | `npm run tauri dev` | planned until the Tauri shell exists |
-| Frontend checks | `npm run check` and `npm run build` | planned until the Svelte shell exists |
-| Rust checks | `cargo fmt --check`, `cargo clippy --all-targets --all-features -- -D warnings`, and `cargo test` from `src-tauri` | planned until the Tauri shell exists |
+| Bootstrap/install | `npm install` | verified 2026-08-12 |
+| Run application | `npm run tauri dev` | verified 2026-08-12; stop with Ctrl-C |
+| Frontend checks | `npm run check` and `npm run build` | verified 2026-08-12 |
+| Rust checks | `cargo fmt --check`, `cargo clippy --all-targets --all-features -- -D warnings`, and `cargo test` from `src-tauri` | verified 2026-08-12 |
+| Shell interaction smoke | In the launched shell, switch capture target and 5/10-minute retention; save remains disabled | verified 2026-08-12 |
 | Exercise primary behavior | Define a local capture-retain-export smoke test at the public application seam | planned |
 | Observe failures | Define structured local logs for permissions, capture, retention, and export | planned |
 | Reset/cleanup | Define a safe command that clears disposable rolling segments but preserves saved exports | planned |

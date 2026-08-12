@@ -6,6 +6,10 @@ node_modules/
 dist/
 build/
 coverage/
+output/
+.playwright-cli/
+src-tauri/target/
+src-tauri/gen/schemas/
 .sonata/bin/
 .skylos/
 .pi/sessions/
