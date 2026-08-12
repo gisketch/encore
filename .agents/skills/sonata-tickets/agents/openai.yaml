@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sonata Tickets"
+  short_description: "Slice approved specs into blocked tickets"
+  default_prompt: "Use $sonata-tickets to split this approved spec into vertical tickets."

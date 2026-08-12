@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sonata Retrofit"
+  short_description: "Ground Sonata in an existing codebase"
+  default_prompt: "Use $sonata-retrofit to deeply inspect this existing codebase and complete its Sonata harness."

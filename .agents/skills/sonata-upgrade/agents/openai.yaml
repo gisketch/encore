@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sonata Upgrade"
+  short_description: "Safely upgrade Sonata and refresh docs"
+  default_prompt: "Use $sonata-upgrade to preview and safely upgrade this Sonata project, then refresh stale docs."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sonata Fix"
+  short_description: "Diagnose and fix bugs from root cause"
+  default_prompt: "Use $sonata-fix to diagnose this bug from evidence, fix its root cause, and verify the behavior."

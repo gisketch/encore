@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sonata Review"
+  short_description: "Review standards, spec, and behavior separately"
+  default_prompt: "Use $sonata-review to review this change against standards, spec, and behavior."

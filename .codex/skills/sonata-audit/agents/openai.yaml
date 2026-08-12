@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sonata Audit"
+  short_description: "Plan security and complexity remediation"
+  default_prompt: "Use $sonata-audit to scan this repository and create a prioritized remediation plan."

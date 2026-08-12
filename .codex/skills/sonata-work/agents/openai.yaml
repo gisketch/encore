@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sonata Work"
+  short_description: "Route and complete any Sonata work request"
+  default_prompt: "Use $sonata-work to take this request through the smallest sufficient workflow and complete it."

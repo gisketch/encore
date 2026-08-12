@@ -1,0 +1,11 @@
+[tool.skylos]
+complexity = 10
+nesting = 3
+max_args = 5
+max_lines = 50
+
+[tool.skylos.gate]
+fail_on_critical = true
+max_security = 0
+max_quality = 0
+strict = true

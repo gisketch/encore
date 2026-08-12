@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sonata Grill"
+  short_description: "Resolve design decisions one at a time"
+  default_prompt: "Use $sonata-grill to stress-test this design one decision at a time."

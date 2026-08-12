@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sonata Spec"
+  short_description: "Write a concise repo-canonical specification"
+  default_prompt: "Use $sonata-spec to turn this discussion into a repository specification."

@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "scc": {
+    "enabled": false,
+    "version": "3.7.0",
+    "thresholds": {}
+  },
+  "skylos": {
+    "enabled": false,
+    "version": "4.29.0",
+    "config": ".sonata/skylos.toml"
+  }
+}

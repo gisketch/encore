@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sonata Implement"
+  short_description: "Implement work through harness risk lanes"
+  default_prompt: "Use $sonata-implement to implement this approved Sonata work."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sonata Setup"
+  short_description: "Configure a repo-local Sonata harness"
+  default_prompt: "Use $sonata-setup to configure this repository harness."
