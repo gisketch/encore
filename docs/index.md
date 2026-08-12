@@ -5,6 +5,7 @@
 - [Project Brief](project-brief.md)
 - [Core Beliefs](core-beliefs.md)
 - [Quality](quality.md)
+- [Issue Tracking](issue-tracker.md)
 
 ## Deeper Context
 

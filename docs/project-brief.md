@@ -60,6 +60,7 @@ incomplete evidence and edge cases are closed as cannot reproduce.
 ## Constraints
 
 - Source: public GitHub repository at `gisketch/encore`.
+- Issue tracking: local repository documents only.
 - Stack: Tauri v2 shell with a Rust core; Windows Graphics Capture through
   `windows-capture`; ScreenCaptureKit through `screencapturekit-rs`; hardware
   H.264 via NVENC/QSV/AMF or VideoToolbox; bundled FFmpeg sidecar for muxing;
