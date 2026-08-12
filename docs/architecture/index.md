@@ -3,9 +3,11 @@
 ## Current Shape
 
 - Kind: greenfield Sonata harness; no runnable application shell yet.
-- Stack: Tauri v2 desktop shell with a Rust capture and retention core. The MVP
-  uses ScreenCaptureKit and VideoToolbox on macOS; FFmpeg is a bundled local
-  muxing sidecar. Platform adapters preserve a path to later Windows support.
+- Stack: Tauri v2 desktop shell with a Svelte 5/TypeScript/Vite interface,
+  framework-neutral Motion animations, and a Rust capture and retention core.
+  The MVP uses ScreenCaptureKit and VideoToolbox on macOS; FFmpeg is a bundled
+  local muxing sidecar. Platform adapters preserve a path to later Windows
+  support.
 
 ## System Map
 
@@ -20,6 +22,9 @@ Only planned runtime responsibilities are known so far:
 - Trigger receives a global hotkey while Encore is unfocused.
 - Packager concatenates retained chunks without re-encoding and writes a local
   MP4 with adjacent metadata and available logs.
+- Desktop UI owns capture selection, retention settings, permission guidance,
+  status, and access to saved clips. Animation is presentation-only and must
+  respect the operating system's reduced-motion preference.
 - Platform adapters own Windows/macOS capture, hardware encoder, and permission
   differences; the retention and packaging policy remains platform-neutral.
 

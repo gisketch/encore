@@ -7,11 +7,11 @@
   ],
   "createdBy": "sonata",
   "createdAt": "2026-08-12",
-  "updatedAt": "2026-08-12T08:49:26.939Z",
+  "updatedAt": "2026-08-12T09:05:22Z",
   "setup": {
-    "status": "pending",
+    "status": "ready",
     "version": 1,
-    "completedAt": null
+    "completedAt": "2026-08-12T09:05:22Z"
   },
   "files": {
     ".agents/skills/sonata-audit/agents/openai.yaml": "5a33b7150dfbf5045bb799d84e9abb50fd1c25c8275ae4f6abdf004990b2115c",

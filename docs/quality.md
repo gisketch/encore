@@ -24,7 +24,8 @@ gate is enabled.
 |---|---|---|
 | Bootstrap/install | `npm install` | planned until the Tauri shell exists |
 | Run application | `npm run tauri dev` | planned until the Tauri shell exists |
-| Fast code checks | Define npm checks plus Rust formatting, linting, and tests with the shell | planned |
+| Frontend checks | `npm run check` and `npm run build` | planned until the Svelte shell exists |
+| Rust checks | `cargo fmt --check`, `cargo clippy --all-targets --all-features -- -D warnings`, and `cargo test` from `src-tauri` | planned until the Tauri shell exists |
 | Exercise primary behavior | Define a local capture-retain-export smoke test at the public application seam | planned |
 | Observe failures | Define structured local logs for permissions, capture, retention, and export | planned |
 | Reset/cleanup | Define a safe command that clears disposable rolling segments but preserves saved exports | planned |

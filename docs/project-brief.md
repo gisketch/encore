@@ -61,16 +61,18 @@ incomplete evidence and edge cases are closed as cannot reproduce.
 
 - Source: public GitHub repository at `gisketch/encore`.
 - Issue tracking: local repository documents only.
-- Stack: Tauri v2 shell with a Rust core; Windows Graphics Capture through
-  `windows-capture`; ScreenCaptureKit through `screencapturekit-rs`; hardware
-  H.264 via NVENC/QSV/AMF or VideoToolbox; bundled FFmpeg sidecar for muxing;
-  `tauri-plugin-global-shortcut` for the trigger.
+- Stack: Tauri v2 shell with a Svelte 5 and TypeScript frontend built by Vite,
+  the framework-neutral `motion` package for intentional UI animation, and a
+  Rust core. The macOS MVP uses ScreenCaptureKit through
+  `screencapturekit-rs`, VideoToolbox hardware H.264, a bundled FFmpeg sidecar
+  for muxing, and `tauri-plugin-global-shortcut` for the trigger.
 - Package manager: Cargo for Rust and npm for JavaScript dependencies/scripts.
 - Runtime: a native local macOS desktop process for the MVP, with platform
   boundaries retained for later Windows support.
 - Data: rolling 10-second fragmented-MP4 segments plus local exports and
-  metadata. Expired rolling segments are deleted; saved exports remain until
-  the user deletes them.
+  metadata. Expired rolling segments are deleted. Saved exports default to a
+  user-visible `Encore` folder under the macOS Movies directory and remain
+  until the user deletes them; the destination can be changed in settings.
 - Security: screen contents and logs remain local; request only the OS capture
   permissions needed to operate. macOS must guide the user through Screen
   Recording permission and the required first-grant restart.
