@@ -65,6 +65,53 @@
 
 .library-pill:hover { background: var(--surface-inset); }
 
+.library-search {
+  position: relative;
+  flex: 0 0 auto;
+  width: 230px;
+  height: 30px;
+  padding: 0 10px 0 30px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--hairline);
+  border-radius: 15px;
+  background: var(--surface-raised);
+}
+
+.library-search__icon {
+  position: absolute;
+  left: 11px;
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid var(--icon-soft);
+  border-radius: 50%;
+}
+
+.library-search__icon::after {
+  content: "";
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  width: 5px;
+  height: 1.5px;
+  background: var(--icon-soft);
+  transform: rotate(45deg);
+  transform-origin: right center;
+}
+
+.library-search__input {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--ink-secondary);
+  font-size: 11.5px;
+  font-weight: 500;
+}
+
+.library-search__input::placeholder { color: var(--ink-faint); }
+.library-search__input:focus { outline: none; }
+.library-search__input::-webkit-search-cancel-button { display: none; }
+
 .library-body {
   flex: 1;
   min-height: 0;
@@ -144,7 +191,12 @@
   gap: 14px;
 }
 
+.library-card__wrap {
+  position: relative;
+}
+
 .library-card {
+  width: 100%;
   display: flex;
   flex-direction: column;
   border: 1px solid var(--hairline);
@@ -156,6 +208,97 @@
 }
 
 .library-card:hover { background: var(--surface-inset); }
+
+.library-card__delete {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 1;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--hairline);
+  border-radius: 50%;
+  background: var(--surface-raised);
+  color: var(--attention);
+  font-size: 13px;
+  line-height: 1;
+  opacity: 0;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.library-card__wrap:hover .library-card__delete,
+.library-card__delete:focus-visible {
+  opacity: 1;
+}
+
+.library-card__confirm {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 14px;
+  background: color-mix(in oklab, var(--ink) 80%, transparent);
+  text-align: center;
+}
+
+.library-card__confirm-text {
+  margin: 0;
+  color: var(--surface-raised);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.library-card__confirm-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.library-card__confirm-cancel,
+.library-card__confirm-delete {
+  height: 26px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 13px;
+  font-size: 10.5px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.library-card__confirm-cancel {
+  background: var(--surface-raised);
+  color: var(--ink-secondary);
+}
+
+.library-card__confirm-delete {
+  background: var(--attention);
+  color: var(--surface-raised);
+}
+
+.library-card__confirm-delete:disabled { opacity: 0.6; cursor: default; }
+
+.library-card__delete-error {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 6px;
+  z-index: 2;
+  margin: 0;
+  padding: 4px 6px;
+  border-radius: 8px;
+  background: color-mix(in oklab, var(--attention) 85%, var(--surface-raised));
+  color: var(--surface-raised);
+  font: 600 9px/1.3 var(--font-mono);
+  text-align: center;
+}
 
 .library-card__thumb {
   position: relative;

@@ -144,3 +144,16 @@ pub(crate) fn thumbnail_bytes(
     let _ = fs::write(&failed_path, b"");
     Err("library_thumbnail_unavailable".to_string())
 }
+
+/// Best-effort removal of `replay_file`'s cached thumbnail (and any
+/// failed-extraction marker), called just before its bundle is moved to
+/// Trash. `stat` must be captured before the move, since the source file
+/// won't exist to re-stat afterward — the cache key depends on its size
+/// and mtime. Never fatal: a stale cache entry that outlives its bundle is
+/// cheap and gets overwritten if the same key is ever reused, so a failed
+/// removal here doesn't fail the delete itself.
+pub(crate) fn forget(cache_dir: &Path, replay_file: &Path, stat: &fs::Metadata) {
+    let key = cache_key(replay_file, stat.len(), modified_unix_ms(stat));
+    let _ = fs::remove_file(jpeg_path(cache_dir, &key));
+    let _ = fs::remove_file(failed_marker_path(cache_dir, &key));
+}

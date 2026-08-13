@@ -4,6 +4,7 @@
   import { onMount } from "svelte";
   import LibraryGroupCard from "./LibraryGroup.svelte";
   import { formatRollup } from "./libraryFormat";
+  import { filterIndex, isGroupVisible } from "./librarySearch";
   import type { LibraryIndex } from "./libraryTypes";
 
   const TINT_COUNT = 4;
@@ -12,6 +13,8 @@
   let index = $state<LibraryIndex>({ groups: [], totalCount: 0, totalBytes: 0 });
   let expandedGroups = $state<number[]>([]);
   let errorCode = $state<string | null>(null);
+  let query = $state("");
+  let displayedIndex = $derived(filterIndex(index, query));
 
   onMount(() => {
     if (!isTauri()) return;
@@ -39,7 +42,7 @@
   }
 
   function isExpanded(groupIndex: number) {
-    return groupIndex < RECENT_EXPANDED_COUNT || expandedGroups.includes(groupIndex);
+    return isGroupVisible(query, groupIndex, expandedGroups, RECENT_EXPANDED_COUNT);
   }
 
   function expand(groupIndex: number) {
@@ -53,6 +56,10 @@
     } catch (error) {
       errorCode = typeof error === "string" ? error : "library_open_failed";
     }
+  }
+
+  function handleDeleted() {
+    void refresh();
   }
 
   function openFolder() {
@@ -85,8 +92,19 @@
       </span>
       <span class="buffer-mark" aria-hidden="true"><i></i><i></i><i></i></span>
       <h1 class="library-title">Library</h1>
-      <span class="library-rollup">{formatRollup(index.totalCount, index.totalBytes)}</span>
+      <span class="library-rollup">
+        {formatRollup(displayedIndex.totalCount, displayedIndex.totalBytes)}
+      </span>
       <span class="spacer" aria-hidden="true"></span>
+      <label class="library-search">
+        <span class="library-search__icon" aria-hidden="true"></span>
+        <input
+          type="search"
+          class="library-search__input"
+          placeholder="Search replays"
+          bind:value={query}
+        />
+      </label>
       <button type="button" class="library-pill" onclick={openFolder}>Open Folder ↗</button>
     </header>
 
@@ -94,16 +112,21 @@
       {#if errorCode}
         <p class="library-error" role="alert">{errorCode}</p>
       {/if}
-      {#if index.groups.length === 0}
-        <p class="library-empty">No replays yet — Save Replay from the bar to see one here.</p>
+      {#if displayedIndex.groups.length === 0}
+        <p class="library-empty">
+          {query.trim().length > 0
+            ? "No replays match your search."
+            : "No replays yet — Save Replay from the bar to see one here."}
+        </p>
       {:else}
-        {#each index.groups as group, groupIndex (group.label)}
+        {#each displayedIndex.groups as group, groupIndex (group.label)}
           <LibraryGroupCard
             {group}
             tint={groupIndex % TINT_COUNT}
             expanded={isExpanded(groupIndex)}
             onExpand={() => expand(groupIndex)}
             onOpen={openReplay}
+            onDeleted={handleDeleted}
           />
         {/each}
       {/if}

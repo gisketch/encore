@@ -1,3 +1,4 @@
+mod delete;
 mod group;
 mod guard;
 mod scan;
@@ -52,6 +53,15 @@ pub fn open_replay_file(destination: &Path, id: &str) -> Result<(), String> {
         .spawn()
         .map(|_| ())
         .map_err(|_| "library_open_failed".to_string())
+}
+
+/// Moves bundle `id`'s whole folder (video + metadata) to the macOS Trash,
+/// after `id` clears the same traversal guard `open_replay_file` uses.
+/// `cache_dir` is best-effort: when present, the bundle's thumbnail cache
+/// entry is forgotten too, but a missing cache dir never blocks the
+/// delete itself.
+pub fn delete_replay(destination: &Path, cache_dir: Option<&Path>, id: &str) -> Result<(), String> {
+    delete::delete_bundle(destination, cache_dir, id, &delete::SystemTrashMover)
 }
 
 /// Returns bundle `id`'s cached thumbnail as base64 JPEG (generating it on

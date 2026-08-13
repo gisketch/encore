@@ -135,6 +135,23 @@ fn open_replay_file(service: tauri::State<'_, CaptureService>, id: String) -> Re
     library::open_replay_file(&service.resolved_save_destination(), &id)
 }
 
+/// Moves bundle `id`'s folder to the macOS Trash. The app cache dir is
+/// looked up the same way `library_thumbnail` does; when unavailable, the
+/// delete still proceeds — only the (best-effort) cache cleanup is skipped.
+#[tauri::command]
+fn delete_replay(
+    app: tauri::AppHandle,
+    service: tauri::State<'_, CaptureService>,
+    id: String,
+) -> Result<(), String> {
+    let cache_dir = app.path().app_cache_dir().ok();
+    library::delete_replay(
+        &service.resolved_save_destination(),
+        cache_dir.as_deref(),
+        &id,
+    )
+}
+
 /// Returns bundle `id`'s cached thumbnail as base64 JPEG, generating it on
 /// a cache miss. Cards call this lazily after the list has already
 /// rendered, so a miss (including "no cache dir available") never blocks
@@ -304,6 +321,7 @@ pub fn run() {
             open_library_window,
             library_index,
             open_replay_file,
+            delete_replay,
             library_thumbnail,
             settings_snapshot,
             update_appearance,

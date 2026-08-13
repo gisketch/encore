@@ -9,12 +9,14 @@
     expanded,
     onExpand,
     onOpen,
+    onDeleted,
   }: {
     group: LibraryGroup;
     tint: number;
     expanded: boolean;
     onExpand: () => void;
     onOpen: (id: string) => void;
+    onDeleted: (id: string) => void;
   } = $props();
 </script>
 
@@ -28,7 +30,7 @@
   {#if expanded}
     <div class="library-grid">
       {#each group.entries as entry (entry.id)}
-        <LibraryCard {entry} {onOpen} />
+        <LibraryCard {entry} {onOpen} {onDeleted} />
       {/each}
     </div>
   {:else}
