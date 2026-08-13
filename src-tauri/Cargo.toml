@@ -14,6 +14,7 @@ cc = "1"
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
+base64 = "0.22"
 chrono = { version = "=0.4.45", features = ["clock"] }
 crossbeam-channel = "0.5.15"
 serde = { version = "1", features = ["derive"] }

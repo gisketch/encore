@@ -1,8 +1,20 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { formatCardSubline, formatDuration, formatSavedTime } from "./libraryFormat";
+  import { fetchThumbnailDataUrl } from "./libraryThumbnail";
   import type { LibraryEntry } from "./libraryTypes";
 
   let { entry, onOpen }: { entry: LibraryEntry; onOpen: (id: string) => void } = $props();
+  let thumbnailUrl = $state<string | null>(null);
+
+  // Fetched after this card has already mounted (i.e. after the list
+  // itself rendered) so a slow or missing thumbnail never blocks the
+  // index; a null result keeps the styled placeholder permanently.
+  onMount(() => {
+    void fetchThumbnailDataUrl(entry.id).then((url) => {
+      thumbnailUrl = url;
+    });
+  });
 </script>
 
 <button
@@ -12,7 +24,11 @@
   aria-label={`Open ${entry.displayName} in the system player`}
 >
   <span class="library-card__thumb">
-    <span class="library-card__thumb-label">Screen frame</span>
+    {#if thumbnailUrl}
+      <img class="library-card__thumb-image" src={thumbnailUrl} alt="" />
+    {:else}
+      <span class="library-card__thumb-label">Screen frame</span>
+    {/if}
     {#if entry.trimmed}
       <span class="library-card__badge library-card__badge--trimmed">Trimmed</span>
     {/if}

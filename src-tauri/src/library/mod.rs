@@ -3,10 +3,12 @@ mod guard;
 mod scan;
 #[cfg(test)]
 mod tests;
+mod thumbnail;
 
 #[allow(unused_imports)]
 pub use group::{LibraryEntry, LibraryGroup};
 
+use base64::{engine::general_purpose::STANDARD, Engine};
 use chrono::Local;
 use serde::Serialize;
 use std::path::Path;
@@ -50,4 +52,17 @@ pub fn open_replay_file(destination: &Path, id: &str) -> Result<(), String> {
         .spawn()
         .map(|_| ())
         .map_err(|_| "library_open_failed".to_string())
+}
+
+/// Returns bundle `id`'s cached thumbnail as base64 JPEG (generating it on
+/// a cache miss), for the `library_thumbnail` command to hand straight to
+/// an `<img src="data:image/jpeg;base64,…">`. Base64-over-the-wire, rather
+/// than widening the Tauri asset-protocol scope to the cache directory, is
+/// the smaller change for ~320px JPEGs.
+pub fn thumbnail_base64(destination: &Path, cache_dir: &Path, id: &str) -> Result<String, String> {
+    let ffmpeg = crate::packager::current_sidecar_path("ffmpeg")
+        .map_err(|_| "library_thumbnail_unavailable".to_string())?;
+    let extractor = thumbnail::ProcessThumbnailExtractor::new(ffmpeg);
+    thumbnail::thumbnail_bytes(destination, cache_dir, id, &extractor)
+        .map(|bytes| STANDARD.encode(bytes))
 }

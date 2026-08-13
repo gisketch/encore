@@ -135,6 +135,23 @@ fn open_replay_file(service: tauri::State<'_, CaptureService>, id: String) -> Re
     library::open_replay_file(&service.resolved_save_destination(), &id)
 }
 
+/// Returns bundle `id`'s cached thumbnail as base64 JPEG, generating it on
+/// a cache miss. Cards call this lazily after the list has already
+/// rendered, so a miss (including "no cache dir available") never blocks
+/// the index — the frontend falls back to its styled placeholder.
+#[tauri::command]
+fn library_thumbnail(
+    app: tauri::AppHandle,
+    service: tauri::State<'_, CaptureService>,
+    id: String,
+) -> Result<String, String> {
+    let cache_dir = app
+        .path()
+        .app_cache_dir()
+        .map_err(|_| "library_thumbnail_unavailable".to_string())?;
+    library::thumbnail_base64(&service.resolved_save_destination(), &cache_dir, &id)
+}
+
 #[tauri::command]
 fn quit_encore(app: tauri::AppHandle) {
     app.exit(0);
@@ -287,6 +304,7 @@ pub fn run() {
             open_library_window,
             library_index,
             open_replay_file,
+            library_thumbnail,
             settings_snapshot,
             update_appearance,
             update_default_source,

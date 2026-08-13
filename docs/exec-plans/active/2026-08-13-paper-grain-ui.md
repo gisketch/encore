@@ -615,3 +615,45 @@ lane before declaring the migration complete.
   outcome), svelte-check/build clean, SCC and sonata gates pass. Manual
   save → appears-under-Today smoke and the light/dark mockup comparison are
   outstanding (no macOS app driver available in this session).
+- 2026-08-13: PG-11 implemented. A new `library::thumbnail` submodule
+  (`thumbnail/mod.rs` + `thumbnail/tests.rs`, split out once the single
+  file crossed 350 lines) generates first-keyframe (≥1s) JPEG thumbnails
+  by shelling out to the bundled ffmpeg sidecar — resolved via the same
+  `packager::current_sidecar_path("ffmpeg")` the packager's own runner
+  uses — with the invocation `-ss 1 -i replay.mp4 -frames:v 1 -vf
+  scale=320:-2 -q:v 5`, injected through a small `ThumbnailExtractor` trait
+  (mirroring `packager::FfmpegRunner`) so tests use a fake instead of a
+  real process. The cache key hashes the replay file's path, byte size,
+  and mtime (`DefaultHasher`, deterministic within one compiled binary) so
+  a touched/replaced video invalidates lazily without any explicit
+  bookkeeping; a cache hit reads straight from
+  `<app-cache-dir>/thumbnails/<key>.jpg`, a miss generates then reads, and
+  a failed extraction writes a sibling `<key>.failed` marker that
+  short-circuits every later call for that key without touching
+  `extractor` again — the export folder is never written to. New
+  `library_thumbnail(id)` command (`src-tauri/src/lib.rs`) resolves
+  `app.path().app_cache_dir()` and returns the cached JPEG as base64,
+  chosen over widening the Tauri asset-protocol scope since it is the
+  smaller change for ~320px images and needs no `tauri.conf.json` security
+  changes. Frontend: a new `libraryThumbnail.ts` helper
+  (`fetchThumbnailDataUrl`, SCC complexity 0) wraps the `invoke` call and
+  collapses any failure (including running outside Tauri) to `null`;
+  `LibraryCard.svelte` calls it from `onMount` — after the card itself has
+  already mounted, i.e. after the list rendered — and swaps in an `<img>`
+  over the striped placeholder only on success, so a slow, missing, or
+  permanently-failed thumbnail never blocks the index and always falls
+  back to the existing styled placeholder (`library.css` gained one
+  `object-fit: cover` rule for the image). Both `LibraryCard.svelte` and
+  `libraryThumbnail.ts` measured 0 SCC complexity before and after the
+  change (verified directly with `scc`), so the tracked-file no-increase
+  gate and the new-file ceilings both hold. Validation: cargo
+  fmt/clippy/test (150 Rust tests total — 143 run, 4 ignored — 7 new
+  thumbnail tests covering cache-key stability/mtime-change/size-change,
+  cache-hit-vs-regenerate call counting, the failed-marker short-circuit,
+  cache-dir isolation from the bundle folder, and traversal-guard
+  rejection, plus 1 `--ignored` integration test that synthesizes a tiny
+  clip with ffmpeg's `lavfi` source and extracts a real JPEG frame from it
+  — run explicitly and passing), svelte-check/build clean, SCC and sonata
+  gates pass. Manual smoke (real thumbnails rendering in the running app,
+  corrupt-video fallback) is outstanding (no macOS app driver available in
+  this session).
