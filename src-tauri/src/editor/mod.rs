@@ -1,4 +1,5 @@
 pub(crate) mod commands;
+pub(crate) mod export;
 mod header;
 mod keyframes;
 

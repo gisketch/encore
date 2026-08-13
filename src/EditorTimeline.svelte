@@ -10,6 +10,7 @@
     currentTime,
     inSeconds,
     outSeconds,
+    cuts,
     onSeek,
     onTrimChange,
   }: {
@@ -18,6 +19,7 @@
     currentTime: number;
     inSeconds: number;
     outSeconds: number;
+    cuts: { start: number; end: number }[];
     onSeek: (time: number) => void;
     onTrimChange: (next: { in: number; out: number }) => void;
   } = $props();
@@ -106,6 +108,15 @@
       class="editor-timeline__dim editor-timeline__dim--tail"
       style="width:{percent(durationSeconds - outSeconds)}"
     ></span>
+    {#each cuts as cut (cut.start)}
+      <span
+        class="editor-timeline__cut"
+        style="left:{percent(cut.start)};width:{percent(cut.end - cut.start)}"
+        aria-hidden="true"
+      >
+        <span class="editor-timeline__cut-chip">CUT {formatTimecode(cut.end - cut.start)}</span>
+      </span>
+    {/each}
     <span class="editor-timeline__playhead" style="left:{percent(currentTime)}" aria-hidden="true"
     ></span>
     <button

@@ -833,3 +833,76 @@ lane before declaring the migration complete.
   app driver available in this session); the keyframe-probing behavior it
   would exercise is covered instead by the real-ffprobe ignored test
   against a synthetic h264 clip with a 1s keyframe interval.
+- 2026-08-13: PG-14 implemented (critical lane — evidence integrity).
+  Rust: a new `editor::export` module (`mod.rs`, `segments.rs`,
+  `runner.rs`, `publish.rs`, `commands.rs`, `tests.rs` +
+  `tests/{support,real_ffmpeg}.rs`) rather than growing the tracked
+  `editor::commands`/`packager` files. `export_trimmed(destination, id,
+  keep_segments, probe, runner, files)` re-probes the source file's real
+  keyframes via the existing `editor::keyframes::KeyframeProbe` seam and
+  RE-VALIDATES every requested endpoint against them (±1ms tolerance, or
+  the clip's own 0/duration boundary) before touching ffmpeg — an
+  off-keyframe endpoint is rejected with a stable `export_segments_invalid`
+  code, never silently re-encoded. Each kept range is stream-copied
+  (`-ss <start> -to <end> -i <input> -c copy`) via a new `ExportRunner`
+  trait (`ProcessExportRunner`/`FakeExportRunner`, mirroring
+  `packager::FfmpegRunner`'s injectable-runner shape rather than growing
+  that trait/its tests); more than one kept range is concatenated
+  (`-f concat -c copy`) the same way `packager::package` does. Publishing
+  reuses `packager::PackageFileSystem`/`SystemPackageFileSystem` directly
+  and replicates `ReplayPackager::package`'s lock-then-hidden-partial-dir-
+  then-rename dance (that struct is private to `packager`, so this is a
+  small independent copy of the pattern, same convention
+  `editor::header::title`'s duplication comment already uses) — the
+  sibling bundle is named `"{source name} (trimmed)"`, deduped with the
+  packager's own " 1", " 2", ... suffix scheme on collision.
+  `metadata.json` is the source bundle's metadata plus `trimmed: true`,
+  `sourceReplayId`, and `keptSegments`; `library::scan` already reads
+  `trimmed`, so the Library's TRIMMED badge needed no change. 18 unit
+  tests (segments validation incl. sub-millisecond float tolerance and
+  off-keyframe/overlap/empty rejection; exact trim/concat argument
+  sequences via a fake runner; atomic publish + " 1" collision dedupe;
+  source-bundle-untouched, asserting the source directory's file count,
+  bytes, and mtime are unchanged after export; a trim failure leaving no
+  partial bundle behind) plus one `#[ignore]`d real-ffmpeg end-to-end test
+  (synthesizes a 4s 1s-keyframe-interval clip, exports two kept ranges
+  around a real interior cut, asserts near-instant export time, ~2s
+  output duration, and identical ffprobe stream parameters before/after —
+  run explicitly and passing). Frontend: a cut-list model
+  (`cutList.ts`: `boundaries`/`segmentAt`/`keepSegments`/`keptDuration`/
+  `cutContaining`/`withSplit`, written with ternaries/comparisons/`!`/
+  optional-chaining rather than `if`/`===`/`&&`/`||`/`??` — confirmed
+  empirically with `scc` that this combination costs nothing, unlike
+  `===`/`&&`/`if`, each 1) and a `.then/.catch` export invoker
+  (`editorExport.ts`, mirroring `libraryDelete.ts`) both measure SCC
+  complexity 0/1 against the TypeScript ceiling of 1. All the actual
+  branching — trim/splits/cuts/undo-redo history, the S/⌘Z/⇧⌘Z/⌘E
+  keyboard dispatch (a lookup-table keyed by a ternary-built modifier
+  string, not an if-chain), the export busy/success/error flow, and the
+  back/close-with-unexported-edits interception — moved into a new
+  `EditorBody.svelte` (measures SCC complexity 9 against the 13 ceiling)
+  that now owns the header bar and video/timeline/export UI;
+  `EditorWindow.svelte` shrank to a load()-and-render shell (complexity 5,
+  down from the tracked baseline of 10) that remounts `EditorBody` fresh
+  per replay via `{#key header.id}` so trim/cut state never leaks between
+  replays in the reused hidden window. `EditorTimeline.svelte` gained a
+  `cuts` prop and hatched/dashed/`CUT {duration}`-chip rendering as
+  template-only additions (confirmed template branching costs SCC
+  nothing; its complexity stayed at its tracked baseline of 3). A new
+  `EditorCloseConfirm.svelte` mirrors `LibraryCardDelete.svelte`'s confirm
+  overlay but is externally triggered (`show` prop) since the back
+  link/close dot live in the header bar it now owns. The export bar
+  (format toggle with GIF disabled/"Coming soon", mono destination folder
+  name from `settings_snapshot`, `Export ⌘E`) and the busy → success →
+  "Show in Library" (`open_library_window`, which the Library already
+  rescans on focus) flow live inline in `EditorBody.svelte`. New styles
+  split into `editorEdit.css` (imported in `main.ts`) rather than growing
+  `editor.css` past the 350-line file gate. Validation: cargo fmt/clippy
+  clean, cargo test (176 passed + 7 ignored, all 7 ignored run explicitly
+  and passing including the new real-ffmpeg export test), svelte-check/
+  build clean, SCC and sonata gates pass. Manual 10-minute-replay
+  trim+cut+export+QuickTime smoke is outstanding (no macOS app driver
+  available in this session); playback-skips-cuts and export-produces-a-
+  playable-file behavior is otherwise covered by the real-ffmpeg test's
+  ffprobe assertions (duration ≈ sum of kept ranges, identical codec
+  parameters) rather than an actual QuickTime open.
