@@ -20,7 +20,7 @@
 
 <main class="settings-shell">
   <section class="settings-card">
-    <header class="settings-titlebar" data-tauri-drag-region>
+    <header class="settings-titlebar" data-tauri-drag-region="deep">
       <span class="traffic-lights">
         <button
           type="button"

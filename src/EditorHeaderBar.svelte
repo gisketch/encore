@@ -16,7 +16,7 @@
   } = $props();
 </script>
 
-<header class="editor-titlebar" data-tauri-drag-region>
+<header class="editor-titlebar" data-tauri-drag-region="deep">
   <span class="traffic-lights">
     <button
       type="button"

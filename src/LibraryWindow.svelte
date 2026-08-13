@@ -78,7 +78,7 @@
 
 <main class="library-shell">
   <section class="library-card-surface">
-    <header class="library-titlebar" data-tauri-drag-region>
+    <header class="library-titlebar" data-tauri-drag-region="deep">
       <span class="traffic-lights">
         <button
           type="button"

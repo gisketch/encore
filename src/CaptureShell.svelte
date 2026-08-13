@@ -258,7 +258,7 @@
 <main class="floating-shell">
   <section class="action-bar" bind:this={rail} aria-label="Encore replay controls">
     <div class="bar-row">
-      <div class="drag-zone" data-tauri-drag-region aria-label="Drag Encore">
+      <div class="drag-zone" data-tauri-drag-region="deep" aria-label="Drag Encore">
         <span class="grip" aria-hidden="true">
           {#each Array(6) as _}<i></i>{/each}
         </span>

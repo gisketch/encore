@@ -33,7 +33,9 @@
     try {
       const id = await invoke<string | null>("editor_context");
       if (!id) {
-        errorCode = "editor_replay_missing";
+        // The hidden window boots before any replay is opened; that is an
+        // empty state, not an error.
+        errorCode = null;
         return;
       }
       if (id === loadedId) return;
@@ -47,6 +49,8 @@
       keyframes = keyframeResult;
     } catch (error) {
       errorCode = typeof error === "string" ? error : "editor_load_failed";
+      header = null;
+      keyframes = null;
     }
   }
 
@@ -64,13 +68,16 @@
 
 <main class="editor-shell">
   <section class="editor-card-surface">
-    {#if errorCode}
-      <div class="editor-body"><p class="editor-error" role="alert">{errorCode}</p></div>
-    {/if}
     {#if header && keyframes}
       {#key header.id}
         <EditorBody {header} {keyframes} onBack={backToLibrary} onClose={closeWindow} />
       {/key}
+    {:else}
+      <div class="editor-body">
+        <p class={errorCode ? "editor-error" : "editor-empty"} role="status">
+          {errorCode ?? "Open a replay from the Library to edit it."}
+        </p>
+      </div>
     {/if}
   </section>
 </main>
