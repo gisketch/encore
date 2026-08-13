@@ -4,21 +4,31 @@
   "version": "0.1.0",
   "identifier": "com.gisketch.encore",
   "build": {
-    "beforeDevCommand": "npm run dev",
+    "beforeDevCommand": "npm run prepare:ffmpeg-sidecars && npm run dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "npm run build",
+    "beforeBuildCommand": "npm run prepare:ffmpeg-sidecars && npm run build",
     "frontendDist": "../dist"
   },
   "app": {
+    "macOSPrivateApi": true,
     "windows": [
       {
         "label": "main",
         "title": "Encore",
-        "width": 1040,
-        "height": 680,
-        "minWidth": 720,
-        "minHeight": 560,
-        "center": true
+        "width": 760,
+        "height": 84,
+        "minWidth": 680,
+        "minHeight": 84,
+        "center": true,
+        "resizable": false,
+        "maximizable": false,
+        "minimizable": false,
+        "decorations": false,
+        "transparent": true,
+        "shadow": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "visibleOnAllWorkspaces": true
       }
     ],
     "security": {
@@ -27,6 +37,13 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all"
+    "targets": "all",
+    "externalBin": [
+      "binaries/ffmpeg",
+      "binaries/ffprobe"
+    ],
+    "macOS": {
+      "minimumSystemVersion": "14.0"
+    }
   }
 }

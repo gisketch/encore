@@ -9,7 +9,12 @@ coverage/
 output/
 .playwright-cli/
 src-tauri/target/
+src-tauri/binaries/*
+!src-tauri/binaries/.gitignore
 src-tauri/gen/schemas/
 .sonata/bin/
 .skylos/
 .pi/sessions/
+
+# Claude worktrees
+.claude/worktrees/

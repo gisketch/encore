@@ -1,0 +1,131 @@
+/* Paper & grain design tokens. Load before component styles.
+   Spec: docs/specs/2026-08-13-paper-grain-design-system.md */
+
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("./assets/fonts/instrument-sans-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("./assets/fonts/instrument-sans-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "Spline Sans Mono";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("./assets/fonts/spline-sans-mono-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Spline Sans Mono";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("./assets/fonts/spline-sans-mono-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+:root {
+  /* Type */
+  --font-sans: "Instrument Sans", -apple-system, system-ui, sans-serif;
+  --font-mono: "Spline Sans Mono", "SFMono-Regular", Consolas, monospace;
+
+  /* Accent (green per user decision 2026-08-13) and fixed hues */
+  --accent: #7a9b6d;
+  --accent-contrast: #f6faf2;
+  --kbd-on-accent: rgba(240, 250, 235, 0.78);
+  --health: #93b28a;
+  --attention: #b05a44;
+
+  /* Paper light palette */
+  --surface: #faf6ec;
+  --surface-raised: #fffdf6;
+  --surface-inset: #f3ecda;
+  --ink: #37322a;
+  --ink-secondary: #4a4438;
+  --ink-muted: #8c8371;
+  --ink-faint: #a39a86;
+  --hairline: rgba(70, 58, 35, 0.14);
+  --hairline-strong: rgba(70, 58, 35, 0.16);
+  --hairline-soft: rgba(70, 58, 35, 0.1);
+  --grip-dot: rgba(60, 50, 30, 0.28);
+  --icon-stroke: rgba(55, 50, 42, 0.55);
+  --icon-soft: rgba(55, 50, 42, 0.45);
+  --accent-chip: color-mix(in oklab, var(--accent) 14%, #fff);
+  --shadow-bar:
+    0 16px 40px rgba(60, 45, 20, 0.22),
+    0 2px 5px rgba(60, 45, 20, 0.1),
+    inset 0 1px rgba(255, 255, 255, 0.7);
+  --shadow-accent: 0 3px 10px color-mix(in oklab, var(--accent) 35%, transparent);
+
+  /* Grain texture (feTurbulence noise, opacity 55/1000 per spec) */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E");
+}
+
+/* Warm charcoal dark palette. Applied when explicitly chosen… */
+:root[data-theme="dark"] {
+  --attention: #c07a5e;
+  --surface: #322c22;
+  --surface-raised: #3b3428;
+  --surface-inset: #443c2e;
+  --ink: #ece4d2;
+  --ink-secondary: #d8cfba;
+  --ink-muted: #9a8f7a;
+  --ink-faint: #7d7361;
+  --hairline: rgba(236, 228, 210, 0.14);
+  --hairline-strong: rgba(236, 228, 210, 0.14);
+  --hairline-soft: rgba(236, 228, 210, 0.1);
+  --grip-dot: rgba(236, 228, 210, 0.3);
+  --icon-stroke: rgba(236, 228, 210, 0.55);
+  --icon-soft: rgba(236, 228, 210, 0.45);
+  --accent-chip: color-mix(in oklab, var(--accent) 22%, #3b3428);
+  --shadow-bar: 0 16px 40px rgba(0, 0, 0, 0.5), inset 0 1px rgba(255, 255, 255, 0.06);
+}
+
+/* …and when the OS is dark and no explicit light choice overrides it. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --attention: #c07a5e;
+    --surface: #322c22;
+    --surface-raised: #3b3428;
+    --surface-inset: #443c2e;
+    --ink: #ece4d2;
+    --ink-secondary: #d8cfba;
+    --ink-muted: #9a8f7a;
+    --ink-faint: #7d7361;
+    --hairline: rgba(236, 228, 210, 0.14);
+    --hairline-strong: rgba(236, 228, 210, 0.14);
+    --hairline-soft: rgba(236, 228, 210, 0.1);
+    --grip-dot: rgba(236, 228, 210, 0.3);
+    --icon-stroke: rgba(236, 228, 210, 0.55);
+    --icon-soft: rgba(236, 228, 210, 0.45);
+    --accent-chip: color-mix(in oklab, var(--accent) 22%, #3b3428);
+    --shadow-bar: 0 16px 40px rgba(0, 0, 0, 0.5), inset 0 1px rgba(255, 255, 255, 0.06);
+  }
+}
+
+@keyframes recpulse {
+  50% {
+    box-shadow: 0 0 0 6px color-mix(in oklab, var(--accent) 0%, transparent);
+  }
+}
