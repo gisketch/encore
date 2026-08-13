@@ -4,6 +4,7 @@ import "./theme.css";
 import "./app.css";
 import "./settings.css";
 import "./library.css";
+import "./editor.css";
 
 const target = document.getElementById("app");
 

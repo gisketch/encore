@@ -1,0 +1,227 @@
+/* Editor window (mockup 1d). Loaded alongside app.css/library.css; the
+   traffic lights and `.spacer` are reused straight from settings.css/
+   app.css, same convention as library.css. */
+
+.editor-shell {
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  display: grid;
+}
+
+.editor-card-surface {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 20px;
+  background-color: var(--surface);
+  background-image: var(--grain);
+  box-shadow: var(--shadow-bar);
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.editor-titlebar {
+  height: 54px;
+  flex: 0 0 auto;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--hairline-soft);
+  cursor: grab;
+}
+
+.editor-titlebar:active { cursor: grabbing; }
+
+.editor-back {
+  flex: 0 0 auto;
+  height: 28px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.editor-back:hover { background: var(--surface-inset); color: var(--ink-secondary); }
+
+.editor-title {
+  margin: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.editor-spec {
+  flex: 0 0 auto;
+  color: var(--ink-muted);
+  font: 500 10px/1 var(--font-mono);
+  letter-spacing: 0.02em;
+}
+
+.editor-badge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--surface-inset);
+  color: var(--ink-secondary);
+  font: 600 9.5px/1 var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.editor-badge i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--health);
+}
+
+.editor-body {
+  flex: 1;
+  min-height: 0;
+  padding: 18px 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+.editor-error {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: color-mix(in oklab, var(--attention) 12%, var(--surface-raised));
+  color: var(--attention);
+  font: 600 10.5px/1.4 var(--font-mono);
+}
+
+.editor-preview {
+  position: relative;
+  flex: 0 0 auto;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  background: var(--ink);
+  overflow: hidden;
+}
+
+.editor-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: var(--ink);
+}
+
+.editor-play {
+  position: absolute;
+  width: 54px;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface-raised);
+  box-shadow: 0 6px 18px color-mix(in oklab, var(--ink) 40%, transparent);
+  cursor: pointer;
+}
+
+.editor-play__icon {
+  width: 0;
+  height: 0;
+  margin-left: 4px;
+  border-top: 9px solid transparent;
+  border-bottom: 9px solid transparent;
+  border-left: 14px solid var(--accent);
+}
+
+.editor-play__icon--pause {
+  width: 12px;
+  height: 16px;
+  margin-left: 0;
+  border: 0;
+  border-left: 4px solid var(--accent);
+  border-right: 4px solid var(--accent);
+}
+
+.editor-readout {
+  margin: 0;
+  color: var(--ink-secondary);
+  font: 600 12px/1 var(--font-mono);
+  letter-spacing: 0.01em;
+}
+
+.editor-timeline {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.editor-timeline__ruler {
+  display: flex;
+  justify-content: space-between;
+  color: var(--ink-faint);
+  font: 500 9px/1 var(--font-mono);
+}
+
+.editor-timeline__track {
+  position: relative;
+  height: 40px;
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  background: var(--surface-inset);
+  cursor: pointer;
+}
+
+.editor-timeline__dim {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: color-mix(in oklab, var(--ink) 22%, transparent);
+}
+
+.editor-timeline__dim--head { left: 0; border-radius: 10px 0 0 10px; }
+.editor-timeline__dim--tail { right: 0; border-radius: 0 10px 10px 0; }
+
+.editor-timeline__playhead {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  background: var(--attention);
+  pointer-events: none;
+}
+
+.editor-timeline__handle {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--accent);
+  border-radius: 7px;
+  background: var(--accent);
+  box-shadow: var(--shadow-accent);
+  cursor: ew-resize;
+  transform: translate(-50%, -50%);
+}
+
+.editor-timeline__handle--out { background: var(--accent); }

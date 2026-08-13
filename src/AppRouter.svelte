@@ -5,6 +5,7 @@
   import { onMount } from "svelte";
   import { applyAppearance, type Appearance, type SettingsSnapshot } from "./appearance";
   import CaptureShell from "./CaptureShell.svelte";
+  import EditorWindow from "./EditorWindow.svelte";
   import LibraryWindow from "./LibraryWindow.svelte";
   import SettingsWindow from "./SettingsWindow.svelte";
 
@@ -38,6 +39,10 @@
   {#if label === "library"}
     <LibraryWindow />
   {:else}
-    <CaptureShell />
+    {#if label === "editor"}
+      <EditorWindow />
+    {:else}
+      <CaptureShell />
+    {/if}
   {/if}
 {/if}

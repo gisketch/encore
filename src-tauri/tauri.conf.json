@@ -59,10 +59,29 @@
         "alwaysOnTop": false,
         "center": true,
         "visible": false
+      },
+      {
+        "label": "editor",
+        "title": "Editor",
+        "width": 1060,
+        "height": 640,
+        "resizable": true,
+        "maximizable": false,
+        "minimizable": false,
+        "decorations": false,
+        "transparent": true,
+        "shadow": false,
+        "alwaysOnTop": false,
+        "center": true,
+        "visible": false
       }
     ],
     "security": {
-      "csp": null
+      "csp": null,
+      "assetProtocol": {
+        "enable": true,
+        "scope": []
+      }
     }
   },
   "bundle": {

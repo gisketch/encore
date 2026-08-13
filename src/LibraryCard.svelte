@@ -28,9 +28,10 @@
     type="button"
     class="library-card"
     onclick={() => onOpen(entry.id)}
-    aria-label={`Open ${entry.displayName} in the system player`}
+    aria-label={`Open ${entry.displayName} in the editor`}
   >
     <span class="library-card__thumb">
+      <span class="library-card__hover-hint" aria-hidden="true">Open in editor</span>
       {#if thumbnailUrl}
         <img class="library-card__thumb-image" src={thumbnailUrl} alt="" />
       {:else}

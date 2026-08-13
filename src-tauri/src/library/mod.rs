@@ -8,6 +8,11 @@ mod thumbnail;
 
 #[allow(unused_imports)]
 pub use group::{LibraryEntry, LibraryGroup};
+/// Re-exported for the `editor` module, which resolves the same
+/// frontend-supplied bundle ids through this one traversal guard rather
+/// than duplicating it.
+#[allow(unused_imports)]
+pub(crate) use guard::{resolve_bundle_dir, resolve_replay_file};
 
 use base64::{engine::general_purpose::STANDARD, Engine};
 use chrono::Local;

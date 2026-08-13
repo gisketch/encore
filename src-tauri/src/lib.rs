@@ -1,6 +1,7 @@
 mod capture;
 mod desktop;
 mod diagnostics;
+mod editor;
 mod encoder;
 mod hotkeys;
 mod library;
@@ -10,6 +11,7 @@ mod retention;
 
 use capture::{CaptureService, CaptureSnapshot, CaptureSource, DiagnosticRecord, SettingsSnapshot};
 use diagnostics::DiagnosticLog;
+use editor::commands::{editor_context, editor_header, editor_keyframes, open_editor_window};
 use replay::{ReplayService, ReplaySnapshot};
 use tauri::{Emitter, Manager};
 
@@ -295,6 +297,7 @@ pub fn run() {
             );
             desktop::wire_capture_menu(app.handle(), &capture);
             app.manage(capture);
+            app.manage(editor::EditorContext::new(None));
             Ok(())
         })
         .on_window_event(desktop::handle_window_event)
@@ -323,6 +326,10 @@ pub fn run() {
             open_replay_file,
             delete_replay,
             library_thumbnail,
+            open_editor_window,
+            editor_context,
+            editor_header,
+            editor_keyframes,
             settings_snapshot,
             update_appearance,
             update_default_source,

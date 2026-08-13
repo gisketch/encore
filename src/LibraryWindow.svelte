@@ -52,9 +52,9 @@
   async function openReplay(id: string) {
     errorCode = null;
     try {
-      await invoke("open_replay_file", { id });
+      await invoke("open_editor_window", { id });
     } catch (error) {
-      errorCode = typeof error === "string" ? error : "library_open_failed";
+      errorCode = typeof error === "string" ? error : "editor_window_open_failed";
     }
   }
 

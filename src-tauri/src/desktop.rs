@@ -75,6 +75,19 @@ pub fn open_library_window(app: &tauri::AppHandle) -> Result<(), String> {
         .map_err(|_| "library_window_open_failed".to_string())
 }
 
+/// Shows and focuses the Editor window, mirroring `open_library_window`.
+/// Callers validate the requested replay and record it in `EditorContext`
+/// before calling this — this function only handles window visibility.
+pub fn open_editor_window(app: &tauri::AppHandle) -> Result<(), String> {
+    let window = app
+        .get_webview_window("editor")
+        .ok_or_else(|| "editor_window_unavailable".to_string())?;
+    window
+        .show()
+        .and_then(|_| window.set_focus())
+        .map_err(|_| "editor_window_open_failed".to_string())
+}
+
 fn position_floating_window(window: &tauri::WebviewWindow) -> tauri::Result<()> {
     let Some(monitor) = window.current_monitor()?.or(window.primary_monitor()?) else {
         return Ok(());
