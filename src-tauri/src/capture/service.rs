@@ -3,6 +3,8 @@ mod appearance;
 mod control;
 mod default_source;
 mod diagnostics;
+mod hotkeys;
+mod library;
 mod monitor;
 mod pause;
 mod persistence;
@@ -22,7 +24,7 @@ use super::{
     },
     permission::{PermissionProvider, SystemPermission},
     platform::NativeFrame,
-    settings::{PersistedTarget, SettingsSnapshot, SettingsStore},
+    settings::{Hotkeys, PersistedTarget, SettingsSnapshot, SettingsStore},
     RuntimeSignal,
 };
 use crate::diagnostics::DiagnosticLog;
@@ -64,6 +66,7 @@ struct Inner {
     // app's video directory so later reads never need an `AppHandle`.
     default_destination: PathBuf,
     after_save: RwLock<String>,
+    hotkeys: RwLock<Hotkeys>,
     diagnostics: DiagnosticLog,
     // Distinguishes an explicit user pause (stream torn down, must stay
     // paused) from the monitor's automatic blank/suspended pause, so queued
@@ -125,6 +128,7 @@ impl CaptureService {
             save_destination: RwLock::new(document.save_destination),
             default_destination,
             after_save: RwLock::new(document.after_save),
+            hotkeys: RwLock::new(document.hotkeys),
             diagnostics,
             user_paused: AtomicBool::new(false),
         }));
@@ -167,6 +171,7 @@ impl CaptureService {
             default_target: self.default_target(),
             save_destination: self.resolved_save_destination(),
             after_save: self.after_save(),
+            hotkeys: self.hotkeys(),
         }
     }
 

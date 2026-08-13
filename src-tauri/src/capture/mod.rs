@@ -13,7 +13,8 @@ pub use model::{CaptureSnapshot, CaptureSource, DiagnosticRecord, SegmentBoundar
 pub(crate) use model::{CaptureState, PipelineState, SourceKind};
 pub(crate) use platform::NativeFrame;
 pub use service::CaptureService;
-pub use settings::SettingsSnapshot;
+pub(crate) use settings::HotkeyId;
+pub use settings::{Hotkeys, SettingsSnapshot};
 
 #[derive(Debug, Clone)]
 pub(crate) enum RuntimeSignal {

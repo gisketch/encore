@@ -41,6 +41,7 @@ fn service_with_default_destination(default_destination: PathBuf) -> CaptureServ
         save_destination: RwLock::new(None),
         default_destination,
         after_save: RwLock::new("nothing".into()),
+        hotkeys: RwLock::new(Hotkeys::default()),
         diagnostics: DiagnosticLog::disabled(),
         user_paused: AtomicBool::new(false),
     }))

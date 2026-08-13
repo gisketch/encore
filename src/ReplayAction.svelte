@@ -1,4 +1,6 @@
 <script lang="ts">
+  import ReplayShortcutHint from "./ReplayShortcutHint.svelte";
+
   type ReplaySnapshot = {
     state: "unavailable" | "preparing" | "saved" | "failed";
     pending: { id: string } | null;
@@ -57,6 +59,6 @@
   <button class="primary-action primary-action--save" class:primary-action--compact={compact} type="button" onclick={onTrigger} {disabled} {title}>
     <span class="clapper" aria-hidden="true"></span>
     Save Replay
-    {#if shortcutRegistered}<kbd>⌘⌥R</kbd>{/if}
+    {#if shortcutRegistered}<ReplayShortcutHint />{/if}
   </button>
 {/if}

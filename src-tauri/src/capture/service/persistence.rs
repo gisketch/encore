@@ -39,6 +39,7 @@ pub(super) fn persist(service: &CaptureService) {
         service.appearance(),
         service.save_destination(),
         service.after_save(),
+        service.hotkeys(),
     );
     let _ = service.0.settings.save(&document);
 }

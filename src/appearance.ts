@@ -4,6 +4,12 @@ export type Appearance = "light" | "dark" | "system";
 
 export type AfterSave = "reveal" | "nothing";
 
+export type HotkeyId = "save_replay" | "pause_capture" | "open_library";
+
+/** Persisted accelerator strings for the three rebindable hotkeys, in
+ *  `tauri-plugin-global-shortcut` syntax (e.g. `"Cmd+Alt+R"`). */
+export type Hotkeys = Record<HotkeyId, string>;
+
 /** Snapshot shape shared by `settings_snapshot` and the `settings-changed`
  *  event; grows as later tickets add settings sections. */
 export type SettingsSnapshot = {
@@ -12,6 +18,7 @@ export type SettingsSnapshot = {
   default_target: PersistedTarget;
   save_destination: string;
   after_save: AfterSave;
+  hotkeys: Hotkeys;
 };
 
 const APPLY: Record<Appearance, () => void> = {

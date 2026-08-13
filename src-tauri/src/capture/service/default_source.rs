@@ -49,6 +49,7 @@ impl CaptureService {
             self.appearance(),
             self.save_destination(),
             self.after_save(),
+            self.hotkeys(),
         );
         let _ = self.0.settings.save(&document);
     }

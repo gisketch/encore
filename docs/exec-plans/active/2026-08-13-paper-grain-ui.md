@@ -461,3 +461,54 @@ lane before declaring the migration complete.
   proving the destination lookup is read fresh per export, rejects an
   unusable destination, and preserves the earlier save), svelte-check/build
   clean, SCC and sonata gates pass.
+- 2026-08-13: PG-07 implemented. Settings gains a Hotkeys section (between
+  Saving and General): three rows — Save replay (⌘⌥R), Pause capture (⌘⌥P),
+  Open library (⌘⌥L) — each a mono kbd-style chip plus an Edit pill. Clicking
+  Edit puts the row in a "Press keys…" capture mode; the next
+  modifier(s)+key combination (at least one of ⌘/⌥/⌃/⇧ required) becomes the
+  candidate and is sent to a new `update_hotkey` command, Escape cancels
+  locally without calling anything. Registration is attempted only inside
+  that command, never while recording. On the Rust side, `SettingsDocument`
+  gains a `hotkeys` field (`Hotkeys { save_replay, pause_capture,
+  open_library }`, accelerator strings in `tauri-plugin-global-shortcut`
+  syntax, e.g. `"Cmd+Alt+R"`), sanitized per-field so one corrupt chord
+  never discards the other two — the struct, its `HotkeyId` companion enum,
+  and validation live in a new `capture::settings::hotkeys` module.
+  Registration for all three now goes through one new top-level `hotkeys`
+  module: `register_all` (startup) and `update_hotkey` (rebind) share a
+  `HotkeyRegistrar` trait seam — production wraps
+  `tauri_plugin_global_shortcut`, tests inject a fake — so the pure
+  retry/rollback core (`register_startup`, `swap_registration`) is testable
+  without a live Tauri app; `update_hotkey` unregisters the previous
+  accelerator, tries the new one, and on failure re-registers the previous
+  one and returns `hotkey_invalid` (unparseable chord) or
+  `hotkey_registration_failed` (conflict) without persisting. `save_replay`'s
+  outcome is still mirrored onto `ReplayService`'s existing
+  `ShortcutRegistrationSnapshot`, so the bar's shortcut-error surface from
+  the original `replay::register_global_shortcut` (now removed, superseded
+  by the unified registrar) keeps working unchanged. Hotkey actions:
+  save_replay reuses the existing trigger/export path; pause_capture toggles
+  pause/resume off the live capture state; open_library now shares a single
+  `CaptureService::open_library` (new `capture::service::library` module)
+  with the bar's `open_export_folder` command, per the "same code path as
+  the bar's library button" contract. The bar's Save Replay kbd hint
+  (`ReplayAction.svelte`) no longer hardcodes ⌘⌥R — a new
+  `ReplayShortcutHint.svelte` self-fetches `settings_snapshot` and listens
+  for `settings-changed`, formatting the persisted chord via a new
+  `hotkeyDisplay.ts` (`formatAccelerator`, straight-line `.replace` chain to
+  clear the TypeScript complexity-1 ceiling); this kept `CaptureShell.svelte`
+  untouched entirely. Known limitation (review, accepted): while a chord is
+  being recorded, the already-registered global hotkeys stay active
+  OS-wide, so pressing the current Save Replay chord during recording still
+  triggers a save; suspending registrations during capture is future work. The recorder's real branching (modifier detection,
+  Escape, capture-mode state) lives in a new `SettingsHotkeysSection.svelte`
+  (measured SCC complexity 13, exactly at the Svelte ceiling). New chip
+  styling (`.hotkey-chip`, `.hotkey-actions`) in `settings.css` follows the
+  existing settings-row/token patterns. Validation: cargo fmt/clippy/test
+  (119 Rust tests total — 116 run, 3 pre-existing ignored fixtures — 9 new
+  in this ticket: hotkeys settings round-trip/corrupt-tolerance/invalid-
+  accelerator-rejected, and the registrar seam's per-hotkey startup status,
+  independent-failure isolation, and rollback-on-failure), svelte-check/
+  build clean, SCC and sonata gates pass. Manual conflict/unfocused-hotkey
+  smoke from the spec's validation section is still outstanding (no macOS
+  app driver available in this session).

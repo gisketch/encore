@@ -1,26 +1,8 @@
-use super::{
-    ReplayDispatch, ReplayService, ReplaySnapshot, ShortcutRegistrationSnapshot,
-    ShortcutRegistrationState,
-};
-use crate::desktop;
+use super::{ReplayDispatch, ReplayService, ReplaySnapshot};
 use std::thread;
-use tauri::{AppHandle, Emitter, Manager};
-use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
+use tauri::{AppHandle, Emitter};
 
-const REPLAY_SHORTCUT: &str = "CommandOrControl+Alt+R";
 const REPLAY_STATE_CHANGED_EVENT: &str = "replay-state-changed";
-
-pub(crate) fn register_global_shortcut(app: &AppHandle, service: &ReplayService) {
-    let registration =
-        app.global_shortcut()
-            .on_shortcut(REPLAY_SHORTCUT, |app, _shortcut, event| {
-                if event.state == ShortcutState::Pressed {
-                    dispatch_global_replay(app.clone());
-                }
-            });
-    service.set_shortcut_registration(shortcut_registration(registration.is_ok()));
-    emit_replay_state(app, service.snapshot());
-}
 
 pub(crate) fn trigger_and_emit(
     app: &AppHandle,
@@ -47,14 +29,6 @@ pub(crate) fn reveal_and_emit(
     let snapshot = result.clone().unwrap_or_else(|_| service.snapshot());
     emit_replay_state(app, snapshot);
     result
-}
-
-fn dispatch_global_replay(app: AppHandle) {
-    thread::spawn(move || {
-        let service = app.state::<ReplayService>().inner().clone();
-        let _ = trigger_and_emit(&app, &service);
-        desktop::show_window_without_focus(&app);
-    });
 }
 
 fn emit_dispatch(
@@ -86,20 +60,13 @@ fn dispatch_export(app: AppHandle, service: ReplayService, replay_id: String) {
     });
 }
 
-fn shortcut_registration(registered: bool) -> ShortcutRegistrationSnapshot {
-    if registered {
-        ShortcutRegistrationSnapshot {
-            state: ShortcutRegistrationState::Registered,
-            error_code: None,
-        }
-    } else {
-        ShortcutRegistrationSnapshot {
-            state: ShortcutRegistrationState::Unavailable,
-            error_code: Some("shortcut_registration_failed".into()),
-        }
-    }
-}
-
 fn emit_replay_state(app: &AppHandle, snapshot: ReplaySnapshot) {
     let _ = app.emit(REPLAY_STATE_CHANGED_EVENT, snapshot);
+}
+
+/// Broadcasts the current replay snapshot, for callers outside this module
+/// that just changed something the snapshot reflects (e.g. the hotkeys
+/// registrar updating `save_replay`'s registration state).
+pub(crate) fn emit_snapshot(app: &AppHandle, service: &ReplayService) {
+    emit_replay_state(app, service.snapshot());
 }

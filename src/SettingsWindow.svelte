@@ -2,6 +2,7 @@
   import { getCurrentWindow } from "@tauri-apps/api/window";
   import type { Appearance } from "./appearance";
   import SettingsAppearanceControl from "./SettingsAppearanceControl.svelte";
+  import SettingsHotkeysSection from "./SettingsHotkeysSection.svelte";
   import SettingsRecordingSection from "./SettingsRecordingSection.svelte";
   import SettingsSavingSection from "./SettingsSavingSection.svelte";
 
@@ -39,6 +40,8 @@
       <SettingsRecordingSection />
 
       <SettingsSavingSection />
+
+      <SettingsHotkeysSection />
 
       <section class="settings-section" aria-labelledby="general-heading">
         <h2 id="general-heading" class="settings-section__title">General</h2>

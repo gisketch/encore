@@ -1,4 +1,5 @@
 mod after_save;
+mod hotkeys;
 mod store;
 #[cfg(test)]
 mod tests;
@@ -8,6 +9,8 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 pub(crate) use after_save::valid as valid_after_save;
+pub use hotkeys::Hotkeys;
+pub(crate) use hotkeys::{valid_accelerator as valid_hotkey_accelerator, HotkeyId};
 pub(crate) use store::SettingsStore;
 
 const CURRENT_VERSION: u32 = 1;
@@ -57,6 +60,8 @@ pub(crate) struct SettingsDocument {
     pub save_destination: Option<PathBuf>,
     #[serde(default = "after_save::default")]
     pub after_save: String,
+    #[serde(default)]
+    pub hotkeys: Hotkeys,
 }
 
 fn current_version() -> u32 {
@@ -86,6 +91,7 @@ impl Default for SettingsDocument {
             appearance: DEFAULT_APPEARANCE.to_string(),
             save_destination: None,
             after_save: after_save::default(),
+            hotkeys: Hotkeys::default(),
         }
     }
 }
@@ -98,6 +104,7 @@ impl SettingsDocument {
         appearance: String,
         save_destination: Option<PathBuf>,
         after_save: String,
+        hotkeys: Hotkeys,
     ) -> Self {
         Self {
             version: CURRENT_VERSION,
@@ -106,6 +113,7 @@ impl SettingsDocument {
             appearance,
             save_destination,
             after_save,
+            hotkeys,
         }
     }
 
@@ -130,6 +138,7 @@ impl SettingsDocument {
             appearance,
             save_destination: self.save_destination,
             after_save: after_save::sanitized(self.after_save),
+            hotkeys: hotkeys::sanitized(self.hotkeys),
         }
     }
 }
@@ -149,6 +158,7 @@ pub struct SettingsSnapshot {
     /// never has to know about the default-folder fallback itself.
     pub save_destination: PathBuf,
     pub after_save: String,
+    pub hotkeys: Hotkeys,
 }
 
 /// Resolves a persisted target against currently available sources. Returns

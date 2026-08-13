@@ -12,9 +12,7 @@ pub(crate) use model::{
     ShortcutRegistrationSnapshot, ShortcutRegistrationState,
 };
 pub(crate) use service::{ReplayDispatch, ReplayService};
-pub(crate) use shortcut::{
-    register_global_shortcut, retry_and_emit, reveal_and_emit, trigger_and_emit,
-};
+pub(crate) use shortcut::{emit_snapshot, retry_and_emit, reveal_and_emit, trigger_and_emit};
 
 #[cfg(test)]
 use service::{ReplayClock, ReplayTime};

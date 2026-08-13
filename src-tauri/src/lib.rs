@@ -2,6 +2,7 @@ mod capture;
 mod desktop;
 mod diagnostics;
 mod encoder;
+mod hotkeys;
 mod packager;
 mod replay;
 mod retention;
@@ -115,13 +116,7 @@ fn open_screen_recording_settings() -> Result<(), String> {
 
 #[tauri::command]
 fn open_export_folder(service: tauri::State<'_, CaptureService>) -> Result<(), String> {
-    let folder = service.resolved_save_destination();
-    std::fs::create_dir_all(&folder).map_err(|_| "export_folder_unavailable".to_string())?;
-    std::process::Command::new("open")
-        .arg(&folder)
-        .spawn()
-        .map(|_| ())
-        .map_err(|_| "export_folder_open_failed".into())
+    service.open_library()
 }
 
 #[tauri::command]
@@ -179,6 +174,26 @@ fn update_after_save(
     Ok(broadcast_settings(&app, service.inner()))
 }
 
+#[tauri::command]
+fn update_hotkey(
+    app: tauri::AppHandle,
+    capture: tauri::State<'_, CaptureService>,
+    replay: tauri::State<'_, ReplayService>,
+    id: String,
+    accelerator: String,
+) -> Result<SettingsSnapshot, String> {
+    let hotkey_id = capture::HotkeyId::parse(&id)?;
+    hotkeys::update_hotkey(
+        &hotkeys::AppHandleRegistrar(&app),
+        &app,
+        capture.inner(),
+        replay.inner(),
+        hotkey_id,
+        accelerator,
+    )?;
+    Ok(broadcast_settings(&app, capture.inner()))
+}
+
 /// Reads the current settings snapshot and broadcasts it to every window,
 /// so commands that change a single field don't each have to remember to.
 fn broadcast_settings(app: &tauri::AppHandle, service: &CaptureService) -> SettingsSnapshot {
@@ -215,7 +230,11 @@ pub fn run() {
             )
             .map_err(std::io::Error::other)?;
             app.manage(replay.clone());
-            replay::register_global_shortcut(app.handle(), &replay);
+            hotkeys::register_all(
+                &hotkeys::AppHandleRegistrar(app.handle()),
+                &capture,
+                &replay,
+            );
             desktop::wire_capture_menu(app.handle(), &capture);
             app.manage(capture);
             Ok(())
@@ -245,7 +264,8 @@ pub fn run() {
             update_appearance,
             update_default_source,
             update_save_destination,
-            update_after_save
+            update_after_save,
+            update_hotkey
         ])
         .run(tauri::generate_context!())
         .expect("error while running Encore");
