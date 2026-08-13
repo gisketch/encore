@@ -30,6 +30,7 @@ fn service_with_startup_target(target: PersistedTarget) -> CaptureService {
         default_destination: std::env::temp_dir().join("encore-service-test-default-destination"),
         after_save: RwLock::new("nothing".into()),
         hotkeys: RwLock::new(Hotkeys::default()),
+        menu_bar_mode: RwLock::new(false),
         diagnostics: DiagnosticLog::disabled(),
         user_paused: AtomicBool::new(false),
     }))

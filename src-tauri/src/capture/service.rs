@@ -5,6 +5,7 @@ mod default_source;
 mod diagnostics;
 mod hotkeys;
 mod library;
+mod menu_bar;
 mod monitor;
 mod pause;
 mod persistence;
@@ -67,6 +68,10 @@ struct Inner {
     default_destination: PathBuf,
     after_save: RwLock<String>,
     hotkeys: RwLock<Hotkeys>,
+    // Whether the floating bar is hidden in favor of a tray-only presence;
+    // mirrors `appearance`'s independently-persisted-slice pattern since the
+    // desktop shell (not just capture) reads and toggles it.
+    menu_bar_mode: RwLock<bool>,
     diagnostics: DiagnosticLog,
     // Distinguishes an explicit user pause (stream torn down, must stay
     // paused) from the monitor's automatic blank/suspended pause, so queued
@@ -129,6 +134,7 @@ impl CaptureService {
             default_destination,
             after_save: RwLock::new(document.after_save),
             hotkeys: RwLock::new(document.hotkeys),
+            menu_bar_mode: RwLock::new(document.menu_bar_mode),
             diagnostics,
             user_paused: AtomicBool::new(false),
         }));
@@ -172,6 +178,7 @@ impl CaptureService {
             save_destination: self.resolved_save_destination(),
             after_save: self.after_save(),
             hotkeys: self.hotkeys(),
+            menu_bar_mode: self.menu_bar_mode(),
         }
     }
 

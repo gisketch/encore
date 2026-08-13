@@ -2,6 +2,8 @@ mod dispatch;
 #[cfg(test)]
 mod tests;
 
+pub(crate) use dispatch::dispatch;
+
 use crate::capture::{CaptureService, HotkeyId, Hotkeys, SettingsSnapshot};
 use crate::replay::{self, ReplayService, ShortcutRegistrationSnapshot, ShortcutRegistrationState};
 use std::str::FromStr;

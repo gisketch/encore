@@ -512,3 +512,49 @@ lane before declaring the migration complete.
   build clean, SCC and sonata gates pass. Manual conflict/unfocused-hotkey
   smoke from the spec's validation section is still outstanding (no macOS
   app driver available in this session).
+- 2026-08-13: PG-08 implemented. Settings → General gains a "Show in menu
+  bar" toggle row (new `SettingsGeneralSection.svelte`, self-fetching
+  `settings_snapshot`/`update_menu_bar_mode` the same way the Recording and
+  Saving sections do) above Appearance, styled as a 36×21 pill switch
+  (`.switch`/`.switch__knob` tokens-only CSS in `settings.css`). A
+  `menu_bar_mode: bool` field joins `SettingsDocument` (default `false` via
+  `#[serde(default)]`, no sanitization needed for a plain bool) and
+  `SettingsSnapshot`, persisted through the existing single-writer path
+  (new `capture::service::menu_bar` module mirroring `appearance`'s
+  independently-persisted-slice pattern) and a new `update_menu_bar_mode`
+  command that broadcasts `settings-changed`. On the desktop side,
+  `desktop.rs` shrank to a thin shell (setup/window-visibility helpers)
+  delegating all tray construction to a new `desktop/tray.rs` — kept as a
+  new file rather than growing the tracked `desktop.rs`, per SCC's
+  zero-tolerance for complexity increases in already-committed files. Tray
+  menu shape is driven by a pure `menu_actions(menu_bar_mode, CaptureState)
+  -> Vec<TrayAction>` function (5 unit tests, no live Tauri app needed):
+  off keeps the historical Show/Hide/Pause-or-Resume/Quit menu unchanged;
+  on swaps to Save Replay, Pause/Resume, Open Library, Settings…, Show
+  Floating Bar, Quit — every bar action reachable while the bar is hidden.
+  The whole menu rebuilds (`TrayIcon::set_menu`) on capture-state-changed
+  and on mode toggle rather than tracking per-item enabled state, so the
+  tray's shape and its Pause/Resume label always come from one code path.
+  Save Replay/Pause-Resume/Open Library route through the exact same
+  `hotkeys::dispatch` the global shortcuts use (bumped from `pub(super)` to
+  `pub(crate)` and re-exported), so tray, hotkey, and bar all share one
+  action path per the ticket's "REUSE these paths" instruction. "Show
+  Floating Bar" and the Settings toggle both funnel through a single
+  `desktop::set_menu_bar_mode` (persist → show/hide bar → rebuild tray →
+  broadcast), avoiding duplicate logic between the two entry points.
+  Startup honors the persisted mode: `wire_capture_menu` (called once
+  `CaptureService` exists) hides the bar and rebuilds the tray before the
+  event loop's first paint if menu-bar mode was left on at the previous
+  quit. Deviation: `capture/settings/tests.rs` crossed the 350-line gate
+  after the new field's tests landed, so it was split into a
+  `capture/settings/tests/` directory (`mod.rs` plus `appearance.rs`,
+  `after_save.rs`, `hotkeys.rs`, `menu_bar.rs`), mirroring the
+  `capture/service/tests/` convention already used elsewhere — a pure
+  file-boundary split, no behavior change. Validation: cargo fmt/clippy/
+  test (128 Rust tests total — 125 run, 3 pre-existing ignored fixtures —
+  7 new: menu-bar-mode default/round-trip at the settings-store layer,
+  default/round-trip/preserves-other-fields at the service layer, and the
+  tray's pure menu-model tests), svelte-check/build clean, SCC and sonata
+  gates pass. Manual full-menu tray exercise and relaunch smoke from the
+  ticket's validation section are outstanding (no macOS app driver
+  available in this session).

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getCurrentWindow } from "@tauri-apps/api/window";
   import type { Appearance } from "./appearance";
-  import SettingsAppearanceControl from "./SettingsAppearanceControl.svelte";
+  import SettingsGeneralSection from "./SettingsGeneralSection.svelte";
   import SettingsHotkeysSection from "./SettingsHotkeysSection.svelte";
   import SettingsRecordingSection from "./SettingsRecordingSection.svelte";
   import SettingsSavingSection from "./SettingsSavingSection.svelte";
@@ -43,13 +43,7 @@
 
       <SettingsHotkeysSection />
 
-      <section class="settings-section" aria-labelledby="general-heading">
-        <h2 id="general-heading" class="settings-section__title">General</h2>
-        <div class="settings-row">
-          <span class="settings-row__label">Appearance</span>
-          <SettingsAppearanceControl value={appearance} onSelect={onSetAppearance} />
-        </div>
-      </section>
+      <SettingsGeneralSection {appearance} onSetAppearance={onSetAppearance} />
     </div>
   </section>
 </main>

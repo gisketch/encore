@@ -7,7 +7,9 @@ use tauri::{AppHandle, Manager};
 /// Routes a fired global hotkey to the same action its bar counterpart
 /// drives, off the OS callback thread — mirroring `replay::shortcut`'s own
 /// dispatch pattern — so a slow action never blocks the next key event.
-pub(super) fn dispatch(app: &AppHandle, id: HotkeyId) {
+/// `pub(crate)` (rather than `pub(super)`) so the tray menu can route
+/// through the exact same action paths as the bar and the hotkeys.
+pub(crate) fn dispatch(app: &AppHandle, id: HotkeyId) {
     let app = app.clone();
     thread::spawn(move || match id {
         HotkeyId::SaveReplay => dispatch_save_replay(&app),

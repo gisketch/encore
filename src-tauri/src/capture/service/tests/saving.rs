@@ -42,6 +42,7 @@ fn service_with_default_destination(default_destination: PathBuf) -> CaptureServ
         default_destination,
         after_save: RwLock::new("nothing".into()),
         hotkeys: RwLock::new(Hotkeys::default()),
+        menu_bar_mode: RwLock::new(false),
         diagnostics: DiagnosticLog::disabled(),
         user_paused: AtomicBool::new(false),
     }))
@@ -121,4 +122,28 @@ fn an_invalid_after_save_value_is_rejected_without_touching_the_persisted_value(
     assert_eq!(result.unwrap_err(), "after_save_invalid");
     assert_eq!(service.after_save(), "nothing");
     assert_eq!(service.0.settings.load().after_save, "nothing");
+}
+
+#[test]
+fn menu_bar_mode_defaults_to_false_and_round_trips_through_the_setter() {
+    let service = service_with_default_destination(scratch_default_destination());
+    assert!(!service.menu_bar_mode());
+
+    let snapshot = service.set_menu_bar_mode(true).unwrap();
+
+    assert!(snapshot.menu_bar_mode);
+    assert!(service.menu_bar_mode());
+    assert!(service.0.settings.load().menu_bar_mode);
+}
+
+#[test]
+fn menu_bar_mode_update_preserves_other_persisted_fields() {
+    let service = service_with_default_destination(scratch_default_destination());
+    service.set_retention_minutes(5).unwrap();
+
+    service.set_menu_bar_mode(true).unwrap();
+
+    let reloaded = service.0.settings.load();
+    assert_eq!(reloaded.retention_minutes, 5);
+    assert!(reloaded.menu_bar_mode);
 }

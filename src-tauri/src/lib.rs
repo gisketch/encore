@@ -194,6 +194,14 @@ fn update_hotkey(
     Ok(broadcast_settings(&app, capture.inner()))
 }
 
+/// Applies, persists, and broadcasts a menu-bar-mode change: hides/shows
+/// the floating bar and reshapes the tray menu to match, via the same path
+/// the tray's own "Show Floating Bar" item uses.
+#[tauri::command]
+fn update_menu_bar_mode(app: tauri::AppHandle, enabled: bool) -> Result<SettingsSnapshot, String> {
+    desktop::set_menu_bar_mode(&app, enabled)
+}
+
 /// Reads the current settings snapshot and broadcasts it to every window,
 /// so commands that change a single field don't each have to remember to.
 fn broadcast_settings(app: &tauri::AppHandle, service: &CaptureService) -> SettingsSnapshot {
@@ -265,7 +273,8 @@ pub fn run() {
             update_default_source,
             update_save_destination,
             update_after_save,
-            update_hotkey
+            update_hotkey,
+            update_menu_bar_mode
         ])
         .run(tauri::generate_context!())
         .expect("error while running Encore");

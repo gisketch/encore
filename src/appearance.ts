@@ -19,6 +19,7 @@ export type SettingsSnapshot = {
   save_destination: string;
   after_save: AfterSave;
   hotkeys: Hotkeys;
+  menu_bar_mode: boolean;
 };
 
 const APPLY: Record<Appearance, () => void> = {

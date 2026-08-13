@@ -40,6 +40,7 @@ pub(super) fn persist(service: &CaptureService) {
         service.save_destination(),
         service.after_save(),
         service.hotkeys(),
+        service.menu_bar_mode(),
     );
     let _ = service.0.settings.save(&document);
 }

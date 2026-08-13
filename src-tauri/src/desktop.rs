@@ -1,51 +1,12 @@
-use crate::capture::{CaptureService, CaptureState};
-use tauri::{
-    menu::{Menu, MenuItem, PredefinedMenuItem},
-    tray::TrayIconBuilder,
-    Listener, Manager, PhysicalPosition, Wry,
-};
+mod tray;
 
-const CAPTURE_STATE_CHANGED_EVENT: &str = "capture-state-changed";
-
-/// Handles to the tray's pause/resume items, kept managed state so their
-/// enabled state can be refreshed whenever capture transitions.
-struct TrayCaptureItems {
-    pause: MenuItem<Wry>,
-    resume: MenuItem<Wry>,
-}
+use crate::capture::{CaptureService, SettingsSnapshot};
+use tauri::{Manager, PhysicalPosition};
 
 pub fn setup(app: &mut tauri::App) -> tauri::Result<()> {
-    let show = MenuItem::with_id(app, "show", "Show Encore", true, None::<&str>)?;
-    let hide = MenuItem::with_id(app, "hide", "Hide Encore", true, None::<&str>)?;
-    let pause = MenuItem::with_id(app, "pause", "Pause Capture", false, None::<&str>)?;
-    let resume = MenuItem::with_id(app, "resume", "Resume Capture", false, None::<&str>)?;
-    let separator = PredefinedMenuItem::separator(app)?;
-    let capture_separator = PredefinedMenuItem::separator(app)?;
-    let quit = MenuItem::with_id(app, "quit", "Quit Encore", true, None::<&str>)?;
-    let menu = Menu::with_items(
-        app,
-        &[
-            &show,
-            &hide,
-            &separator,
-            &pause,
-            &resume,
-            &capture_separator,
-            &quit,
-        ],
-    )?;
-    let mut tray = TrayIconBuilder::with_id("encore")
-        .menu(&menu)
-        .tooltip("Encore — local replay")
-        .show_menu_on_left_click(true)
-        .on_menu_event(handle_menu_event);
-    if let Some(icon) = app.default_window_icon() {
-        tray = tray.icon(icon.clone());
-    }
+    tray::build(app)?;
     #[cfg(target_os = "macos")]
     app.set_activation_policy(tauri::ActivationPolicy::Accessory);
-    tray.build(app)?;
-    app.manage(TrayCaptureItems { pause, resume });
 
     if let Some(window) = app.get_webview_window("main") {
         position_floating_window(&window)?;
@@ -53,59 +14,26 @@ pub fn setup(app: &mut tauri::App) -> tauri::Result<()> {
     Ok(())
 }
 
-/// Keeps the tray's Pause/Resume items reflecting the live capture state:
-/// enabled only when the corresponding action is currently valid.
+/// Wires the tray to live capture state (see `tray::wire`), including
+/// honoring a persisted "menu bar mode" at startup.
 pub fn wire_capture_menu(app: &tauri::AppHandle, capture: &CaptureService) {
-    refresh_capture_menu(app, capture.snapshot().capture);
-    let app_handle = app.clone();
-    let capture = capture.clone();
-    app.listen(CAPTURE_STATE_CHANGED_EVENT, move |_event| {
-        refresh_capture_menu(&app_handle, capture.snapshot().capture);
-    });
+    tray::wire(app, capture);
 }
 
-fn refresh_capture_menu(app: &tauri::AppHandle, capture: CaptureState) {
-    let Some(items) = app.try_state::<TrayCaptureItems>() else {
-        return;
-    };
-    let _ = items.pause.set_enabled(capture == CaptureState::Capturing);
-    let _ = items.resume.set_enabled(capture == CaptureState::Paused);
+/// Applies a menu-bar-mode change: persists it, shows/hides the bar, and
+/// rebuilds the tray menu to match. Shared by the `update_menu_bar_mode`
+/// command and the tray's own "Show Floating Bar" item.
+pub fn set_menu_bar_mode(
+    app: &tauri::AppHandle,
+    enabled: bool,
+) -> Result<SettingsSnapshot, String> {
+    tray::set_menu_bar_mode(app, enabled)
 }
 
 pub fn handle_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
     if let tauri::WindowEvent::CloseRequested { api, .. } = event {
         api.prevent_close();
         let _ = window.hide();
-    }
-}
-
-fn handle_menu_event(app: &tauri::AppHandle, event: tauri::menu::MenuEvent) {
-    match event.id().as_ref() {
-        "show" => show_window(app),
-        "hide" => hide_window(app),
-        "pause" => pause_capture(app),
-        "resume" => resume_capture(app),
-        "quit" => app.exit(0),
-        _ => {}
-    }
-}
-
-fn pause_capture(app: &tauri::AppHandle) {
-    if let Some(capture) = app.try_state::<CaptureService>() {
-        let _ = capture.pause();
-    }
-}
-
-fn resume_capture(app: &tauri::AppHandle) {
-    if let Some(capture) = app.try_state::<CaptureService>() {
-        let _ = capture.resume();
-    }
-}
-
-fn show_window(app: &tauri::AppHandle) {
-    show_window_without_focus(app);
-    if let Some(window) = app.get_webview_window("main") {
-        let _ = window.set_focus();
     }
 }
 
@@ -116,7 +44,7 @@ pub(crate) fn show_window_without_focus(app: &tauri::AppHandle) {
     }
 }
 
-fn hide_window(app: &tauri::AppHandle) {
+pub(crate) fn hide_window(app: &tauri::AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
         let _ = window.hide();
     }
