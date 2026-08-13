@@ -5,18 +5,17 @@
    *  are unexported. Split out of `EditorWindow.svelte` (already at the
    *  harness's tracked-complexity baseline) into its own new file, which
    *  has the room. */
-  import { convertFileSrc, invoke } from "@tauri-apps/api/core";
-  import { onMount, untrack } from "svelte";
-  import type { SettingsSnapshot } from "./appearance";
+  import { convertFileSrc } from "@tauri-apps/api/core";
+  import { untrack } from "svelte";
   import EditorCloseConfirm from "./EditorCloseConfirm.svelte";
-  import { exportTrimmedReplay } from "./editorExport";
+  import EditorExportBar from "./EditorExportBar.svelte";
   import EditorHeaderBar from "./EditorHeaderBar.svelte";
   import { boundaries, cutContaining, keepSegments, keptDuration, segmentAt, withSplit } from "./cutList";
   import type { Cut } from "./cutList";
   import { formatSpecLine, formatTimecode } from "./editorFormat";
   import EditorTimeline from "./EditorTimeline.svelte";
   import { clampToTrim, nearestKeyframe, playbackClampState } from "./editorTimeline";
-  import type { EditorHeader, EditorKeyframes } from "./editorTypes";
+  import type { EditorHeader, EditorKeyframes, ExportFormat } from "./editorTypes";
 
   let {
     header,
@@ -46,24 +45,15 @@
   let history = $state<Snapshot[]>([]);
   let future = $state<Snapshot[]>([]);
   let dirty = $state(false);
-  let destinationName = $state("");
+  let format = $state<ExportFormat>("mp4");
   let pendingAction = $state<(() => void) | null>(null);
-  let exportState = $state<"idle" | "busy" | "success" | "error">("idle");
-  let exportErrorCode = $state<string | null>(null);
+  let exportBar: { triggerExport: () => Promise<string | null> } | undefined;
 
   let boundaryPoints = $derived(boundaries(inSeconds, outSeconds, splits));
   let kept = $derived(keepSegments(inSeconds, outSeconds, splits, cuts));
   let keptSeconds = $derived(keptDuration(kept));
   let canUndo = $derived(history.length > 0);
   let canRedo = $derived(future.length > 0);
-
-  onMount(() => {
-    void invoke<SettingsSnapshot>("settings_snapshot").then((snapshot) => {
-      const segments = snapshot.save_destination.split("/");
-      const last = segments.at(-1);
-      destinationName = last ? last : snapshot.save_destination;
-    });
-  });
 
   function snapshot(): Snapshot {
     return { inSeconds, outSeconds, splits: [...splits], cuts: [...cuts] };
@@ -144,19 +134,6 @@
     dirty = true;
   }
 
-  async function startExport() {
-    exportState = "busy";
-    exportErrorCode = null;
-    const result = await exportTrimmedReplay(header.id, kept);
-    exportState = result.ok ? "success" : "error";
-    exportErrorCode = result.ok ? null : result.error;
-    dirty = result.ok ? false : dirty;
-  }
-
-  function showInLibrary() {
-    void invoke("open_library_window");
-  }
-
   function isTypingTarget(event: KeyboardEvent): boolean {
     const target = event.target as HTMLElement | null;
     const tag = target ? target.tagName.toLowerCase() : "";
@@ -170,7 +147,7 @@
 
   const keyActions: Record<string, () => void> = {
     s: splitAtPlayhead,
-    "cmd+e": startExport,
+    "cmd+e": () => void exportBar?.triggerExport(),
     "cmd+z": undo,
     "cmd+shift+z": redo,
   };
@@ -206,6 +183,7 @@
 <EditorHeaderBar
   title={header.title}
   specLine={formatSpecLine(header)}
+  {format}
   onBack={requestBack}
   onClose={requestClose}
 />
@@ -249,29 +227,14 @@
     <button type="button" class="editor-toolbar__button" onclick={redo} disabled={!canRedo}>Redo</button>
   </div>
 
-  <div class="editor-export-bar">
-    <div class="editor-export-bar__formats">
-      <span class="editor-export-bar__format editor-export-bar__format--active">MP4</span>
-      <span class="editor-export-bar__format" title="Coming soon">GIF</span>
-    </div>
-    <span class="editor-export-bar__destination">{destinationName}</span>
-    {#if exportState === "success"}
-      <span class="editor-export-bar__success">Exported</span>
-      <button type="button" class="editor-export-bar__link" onclick={showInLibrary}>Show in Library</button>
-    {:else}
-      <button
-        type="button"
-        class="editor-export-bar__export"
-        onclick={startExport}
-        disabled={exportState === "busy"}
-      >
-        {exportState === "busy" ? "Exporting…" : "Export ⌘E"}
-      </button>
-    {/if}
-    {#if exportErrorCode}
-      <span class="editor-export-bar__error" role="alert">{exportErrorCode}</span>
-    {/if}
-  </div>
+  <EditorExportBar
+    bind:this={exportBar}
+    replayId={header.id}
+    {kept}
+    {format}
+    onFormatChange={(next) => (format = next)}
+    onExportSuccess={() => (dirty = false)}
+  />
 </div>
 
 <EditorCloseConfirm show={pendingAction !== null} onCancel={cancelPendingClose} onDiscard={confirmDiscard} />

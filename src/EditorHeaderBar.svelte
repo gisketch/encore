@@ -1,12 +1,16 @@
 <script lang="ts">
+  import type { ExportFormat } from "./editorTypes";
+
   let {
     title,
     specLine,
+    format,
     onBack,
     onClose,
   }: {
     title: string;
     specLine: string;
+    format: ExportFormat;
     onBack: () => void;
     onClose: () => void;
   } = $props();
@@ -30,5 +34,9 @@
     <span class="editor-spec">{specLine}</span>
   {/if}
   <span class="spacer" aria-hidden="true"></span>
-  <span class="editor-badge"><i aria-hidden="true"></i>lossless — no re-encode</span>
+  {#if format === "gif"}
+    <span class="editor-badge editor-badge--gif"><i aria-hidden="true"></i>GIF — re-encoded</span>
+  {:else}
+    <span class="editor-badge"><i aria-hidden="true"></i>lossless — no re-encode</span>
+  {/if}
 </header>

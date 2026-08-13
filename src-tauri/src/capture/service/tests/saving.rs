@@ -117,11 +117,22 @@ fn after_save_defaults_to_nothing_and_round_trips_through_the_setter() {
 fn an_invalid_after_save_value_is_rejected_without_touching_the_persisted_value() {
     let service = service_with_default_destination(scratch_default_destination());
 
-    let result = service.set_after_save("open_editor".into());
+    let result = service.set_after_save("delete".into());
 
     assert_eq!(result.unwrap_err(), "after_save_invalid");
     assert_eq!(service.after_save(), "nothing");
     assert_eq!(service.0.settings.load().after_save, "nothing");
+}
+
+#[test]
+fn after_save_accepts_open_editor_and_round_trips_through_the_setter() {
+    let service = service_with_default_destination(scratch_default_destination());
+
+    let snapshot = service.set_after_save("open_editor".into()).unwrap();
+
+    assert_eq!(snapshot.after_save, "open_editor");
+    assert_eq!(service.after_save(), "open_editor");
+    assert_eq!(service.0.settings.load().after_save, "open_editor");
 }
 
 #[test]

@@ -1,8 +1,10 @@
+mod gif_support;
 mod real_ffmpeg;
 mod support;
 
-use super::export_trimmed;
+use super::{export_gif, export_trimmed, GIF_FILTER};
 use crate::packager::SystemPackageFileSystem;
+use gif_support::FakeGifRunner;
 use std::fs;
 use support::{keep, write_source_bundle, FakeExportRunner, FakeProbe, TestDirectory};
 
@@ -213,4 +215,121 @@ fn a_missing_replay_id_is_rejected_by_the_shared_traversal_guard() {
     );
 
     assert!(result.is_err());
+}
+
+#[test]
+fn gif_export_runs_palettegen_then_paletteuse_with_the_shared_640_10fps_filter() {
+    let root = TestDirectory::new("gif-single");
+    write_source_bundle(root.path(), "Encore Replay G", b"source-video");
+    let export_runner = FakeExportRunner::new();
+    let gif_runner = FakeGifRunner::new();
+    let files = SystemPackageFileSystem;
+
+    let published = export_gif(
+        root.path(),
+        "Encore Replay G",
+        &[keep(1.0, 3.0)],
+        &FakeProbe,
+        &export_runner,
+        &gif_runner,
+        &files,
+    )
+    .unwrap();
+
+    assert_eq!(
+        published.file_name().unwrap().to_string_lossy(),
+        "Encore Replay G (trimmed).gif"
+    );
+    assert_eq!(fs::read(&published).unwrap(), b"GIF89a-fake-gif-bytes");
+
+    let palettegen_calls = gif_runner.palettegen_calls.lock().unwrap();
+    assert_eq!(palettegen_calls.len(), 1);
+    assert!(palettegen_calls[0].filter.contains("fps=10"));
+    assert!(palettegen_calls[0].filter.contains("scale=640:-2"));
+    assert_eq!(palettegen_calls[0].filter, GIF_FILTER);
+
+    let paletteuse_calls = gif_runner.paletteuse_calls.lock().unwrap();
+    assert_eq!(paletteuse_calls.len(), 1);
+    assert!(paletteuse_calls[0].filter.contains("fps=10"));
+    assert!(paletteuse_calls[0].filter.contains("scale=640:-2"));
+    assert_eq!(paletteuse_calls[0].filter, GIF_FILTER);
+    // paletteuse ran against the exact palette palettegen just built.
+    assert!(paletteuse_calls[0].palette_matches_prior_call);
+
+    // No leftover scratch workspace next to the published GIF.
+    let remaining: Vec<_> = fs::read_dir(root.path())
+        .unwrap()
+        .map(|entry| entry.unwrap().file_name().to_string_lossy().into_owned())
+        .collect();
+    assert_eq!(remaining.len(), 2); // source bundle + published gif only
+}
+
+#[test]
+fn gif_export_of_two_kept_ranges_first_builds_a_trimmed_intermediate() {
+    let root = TestDirectory::new("gif-multi");
+    write_source_bundle(root.path(), "Encore Replay H", b"source-video");
+    let export_runner = FakeExportRunner::new();
+    let gif_runner = FakeGifRunner::new();
+    let files = SystemPackageFileSystem;
+
+    export_gif(
+        root.path(),
+        "Encore Replay H",
+        &[keep(0.0, 1.0), keep(2.0, 3.0)],
+        &FakeProbe,
+        &export_runner,
+        &gif_runner,
+        &files,
+    )
+    .unwrap();
+
+    let trims = export_runner.trims.lock().unwrap();
+    assert_eq!(trims.len(), 2);
+    assert_eq!(*export_runner.concat_calls.lock().unwrap(), 1);
+    assert_eq!(gif_runner.palettegen_calls.lock().unwrap().len(), 1);
+}
+
+#[test]
+fn a_gif_export_endpoint_off_any_keyframe_is_rejected_before_any_ffmpeg_call() {
+    let root = TestDirectory::new("gif-rejected");
+    write_source_bundle(root.path(), "Encore Replay I", b"source-video");
+    let gif_runner = FakeGifRunner::new();
+    let files = SystemPackageFileSystem;
+
+    let result = export_gif(
+        root.path(),
+        "Encore Replay I",
+        &[keep(0.5, 3.0)],
+        &FakeProbe,
+        &FakeExportRunner::new(),
+        &gif_runner,
+        &files,
+    );
+
+    assert_eq!(result.err(), Some("export_segments_invalid".to_string()));
+    assert!(gif_runner.palettegen_calls.lock().unwrap().is_empty());
+}
+
+#[test]
+fn a_gif_palettegen_failure_leaves_no_scratch_workspace_behind() {
+    let root = TestDirectory::new("gif-failure");
+    write_source_bundle(root.path(), "Encore Replay J", b"source-video");
+    let files = SystemPackageFileSystem;
+
+    let result = export_gif(
+        root.path(),
+        "Encore Replay J",
+        &[keep(0.0, 1.0)],
+        &FakeProbe,
+        &FakeExportRunner::new(),
+        &FakeGifRunner::failing(),
+        &files,
+    );
+
+    assert_eq!(result.err(), Some("export_gif_failed".to_string()));
+    let remaining: Vec<_> = fs::read_dir(root.path())
+        .unwrap()
+        .map(|entry| entry.unwrap().file_name().to_string_lossy().into_owned())
+        .collect();
+    assert_eq!(remaining, vec!["Encore Replay J".to_string()]);
 }

@@ -9,6 +9,7 @@
 
   const AFTER_SAVE_OPTIONS: { value: AfterSave; label: string }[] = [
     { value: "reveal", label: "Show in Finder" },
+    { value: "open_editor", label: "Open editor" },
     { value: "nothing", label: "Nothing" },
   ];
 

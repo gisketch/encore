@@ -1,3 +1,4 @@
+pub(crate) mod clipboard;
 pub(crate) mod commands;
 pub(crate) mod export;
 mod header;

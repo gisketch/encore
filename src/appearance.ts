@@ -2,7 +2,7 @@ import type { PersistedTarget } from "./recordingSettings";
 
 export type Appearance = "light" | "dark" | "system";
 
-export type AfterSave = "reveal" | "nothing";
+export type AfterSave = "reveal" | "nothing" | "open_editor";
 
 export type HotkeyId = "save_replay" | "pause_capture" | "open_library";
 

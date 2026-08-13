@@ -1,4 +1,7 @@
 pub(crate) mod commands;
+mod gif;
+mod gif_export;
+mod gif_publish;
 mod publish;
 mod runner;
 mod segments;
@@ -15,6 +18,10 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
+#[allow(unused_imports)]
+pub(crate) use gif::{GifRunner, ProcessGifRunner, GIF_FILTER};
+#[allow(unused_imports)]
+pub(crate) use gif_export::export_gif;
 #[allow(unused_imports)]
 pub(crate) use runner::{ExportRunner, ProcessExportRunner};
 #[allow(unused_imports)]
@@ -83,28 +90,58 @@ fn write_trimmed_bundle(
     source_id: &str,
     source_metadata: Option<&serde_json::Value>,
 ) -> Result<(), String> {
+    let replay_output = partial.join(packager::REPLAY_FILENAME);
+    build_trimmed_video(
+        runner,
+        files,
+        source_replay,
+        partial,
+        segments,
+        &replay_output,
+    )?;
+
+    let metadata = trimmed_metadata_json(source_metadata, source_id, segments)?;
+    files
+        .write_synced(&partial.join(packager::METADATA_FILENAME), &metadata)
+        .map_err(|_| "export_metadata_failed".to_string())?;
+    files
+        .sync_dir(partial)
+        .map_err(|_| "export_destination_unavailable".to_string())
+}
+
+/// Trims each kept range from `source_replay` into `workspace`, concatting
+/// them (when there is more than one) into a single file at `output`.
+/// Shared by the MP4 bundle path (`write_trimmed_bundle`, `output` lands
+/// inside the published bundle) and the GIF path (`export_gif`, `output` is
+/// a scratch intermediate that never leaves the workspace) so both formats
+/// cut the exact same way.
+fn build_trimmed_video(
+    runner: &dyn ExportRunner,
+    files: &dyn PackageFileSystem,
+    source_replay: &Path,
+    workspace: &Path,
+    segments: &[KeepSegment],
+    output: &Path,
+) -> Result<(), String> {
     let mut segment_paths = Vec::with_capacity(segments.len());
     for (index, segment) in segments.iter().enumerate() {
-        let output = partial.join(format!("segment-{index}.mp4"));
+        let segment_output = workspace.join(format!("segment-{index}.mp4"));
         runner
-            .trim(source_replay, segment.start, segment.end, &output)
+            .trim(source_replay, segment.start, segment.end, &segment_output)
             .map_err(trim_error)?;
-        segment_paths.push(output);
+        segment_paths.push(segment_output);
     }
 
-    let replay_output = partial.join(packager::REPLAY_FILENAME);
     if segment_paths.len() == 1 {
         files
-            .rename(&segment_paths[0], &replay_output)
+            .rename(&segment_paths[0], output)
             .map_err(|_| "export_destination_unavailable".to_string())?;
     } else {
-        let manifest = partial.join("concat.txt");
+        let manifest = workspace.join("concat.txt");
         files
             .write_synced(&manifest, &concat_manifest(&segment_paths))
             .map_err(|_| "export_destination_unavailable".to_string())?;
-        runner
-            .concat(&manifest, &replay_output)
-            .map_err(concat_error)?;
+        runner.concat(&manifest, output).map_err(concat_error)?;
         files
             .remove_file(&manifest)
             .map_err(|_| "export_destination_unavailable".to_string())?;
@@ -116,7 +153,7 @@ fn write_trimmed_bundle(
     }
 
     if files
-        .file_len(&replay_output)
+        .file_len(output)
         .ok()
         .filter(|size| *size > 0)
         .is_none()
@@ -124,15 +161,7 @@ fn write_trimmed_bundle(
         return Err("export_concat_failed".to_string());
     }
     files
-        .sync_file(&replay_output)
-        .map_err(|_| "export_destination_unavailable".to_string())?;
-
-    let metadata = trimmed_metadata_json(source_metadata, source_id, segments)?;
-    files
-        .write_synced(&partial.join(packager::METADATA_FILENAME), &metadata)
-        .map_err(|_| "export_metadata_failed".to_string())?;
-    files
-        .sync_dir(partial)
+        .sync_file(output)
         .map_err(|_| "export_destination_unavailable".to_string())
 }
 

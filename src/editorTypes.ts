@@ -14,3 +14,7 @@ export type EditorKeyframes = {
   seconds: number[];
   durationSeconds: number;
 };
+
+/** The export bar's format toggle (PG-15): MP4 stays lossless, GIF is
+ *  always a re-encode. */
+export type ExportFormat = "mp4" | "gif";

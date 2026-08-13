@@ -2,9 +2,12 @@
 //! mirroring `editor::keyframes`'s own real-sidecar test. Run explicitly
 //! (`cargo test -- --ignored`) since it shells out to real binaries.
 
-use super::super::{export_trimmed, KeepSegment};
+use super::super::{export_gif, export_trimmed, KeepSegment};
 use crate::{
-    editor::{export::ProcessExportRunner, keyframes::ProcessKeyframeProbe},
+    editor::{
+        export::{ProcessExportRunner, ProcessGifRunner},
+        keyframes::ProcessKeyframeProbe,
+    },
     packager::{current_sidecar_path, FfmpegRunner, ProcessFfmpegRunner, SystemPackageFileSystem},
 };
 use std::{fs, process::Command};
@@ -105,6 +108,91 @@ fn real_ffmpeg_exports_two_kept_ranges_as_a_stream_copy() {
     let source_media = inspector.inspect(&clip).unwrap();
     let output_media = inspector.inspect(&output).unwrap();
     assert_eq!(source_media, output_media);
+
+    let _ = fs::remove_dir_all(&root);
+}
+
+/// Real end-to-end GIF export against the bundled ffmpeg/ffprobe sidecars:
+/// synthesizes a short clip, exports a kept range as a GIF through the real
+/// two-pass palette pipeline, and asserts the output exists and starts
+/// with the GIF89a magic bytes. Run explicitly (`cargo test -- --ignored`).
+#[test]
+#[ignore]
+fn real_ffmpeg_exports_a_gif_starting_with_the_gif89a_magic_bytes() {
+    let ffmpeg = current_sidecar_path("ffmpeg")
+        .expect("ffmpeg sidecar must be present (run npm run prepare:ffmpeg-sidecars)");
+    let ffprobe = current_sidecar_path("ffprobe")
+        .expect("ffprobe sidecar must be present (run npm run prepare:ffmpeg-sidecars)");
+
+    let root = std::env::temp_dir().join(format!(
+        "encore-editor-export-gif-real-{}",
+        std::process::id()
+    ));
+    let _ = fs::remove_dir_all(&root);
+    let bundle = root.join("Encore Replay Gif Real");
+    fs::create_dir_all(&bundle).unwrap();
+
+    let clip = bundle.join("replay.mp4");
+    let status = Command::new(&ffmpeg)
+        .args([
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-y",
+            "-f",
+            "lavfi",
+            "-i",
+        ])
+        .arg("testsrc=duration=3:size=64x64:rate=30")
+        .args(["-c:v", "libx264", "-g", "30", "-keyint_min", "30"])
+        .arg(&clip)
+        .status()
+        .unwrap();
+    assert!(status.success(), "failed to synthesize a test clip");
+    fs::write(bundle.join("metadata.json"), r#"{"schemaVersion":1}"#).unwrap();
+
+    let keyframes =
+        crate::editor::keyframes::probe(&clip, &ProcessKeyframeProbe::new(ffprobe.clone()))
+            .unwrap();
+    assert!(!keyframes.seconds.is_empty());
+
+    let keep_segments = vec![KeepSegment {
+        start: 0.0,
+        end: 1.0,
+    }];
+
+    let probe = ProcessKeyframeProbe::new(ffprobe);
+    let export_runner = ProcessExportRunner::new(ffmpeg.clone());
+    let gif_runner = ProcessGifRunner::new(ffmpeg);
+    let files = SystemPackageFileSystem;
+
+    let published = export_gif(
+        &root,
+        "Encore Replay Gif Real",
+        &keep_segments,
+        &probe,
+        &export_runner,
+        &gif_runner,
+        &files,
+    )
+    .unwrap();
+
+    assert!(published.is_file(), "expected {published:?} to exist");
+    assert_eq!(
+        published.file_name().unwrap().to_string_lossy(),
+        "Encore Replay Gif Real (trimmed).gif"
+    );
+    let bytes = fs::read(&published).unwrap();
+    assert!(
+        bytes.len() >= 6,
+        "gif output too small: {} bytes",
+        bytes.len()
+    );
+    assert_eq!(
+        &bytes[0..6],
+        b"GIF89a",
+        "output did not start with the GIF89a magic bytes"
+    );
 
     let _ = fs::remove_dir_all(&root);
 }

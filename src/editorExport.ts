@@ -16,6 +16,15 @@ export async function exportTrimmedReplay(id: string, keepSegments: Cut[]): Prom
     .catch((error: unknown) => ({ ok: false as const, error: errorCode(error) }));
 }
 
+/** Invokes `export_gif_replay`, same result shape as `exportTrimmedReplay`
+ *  except `id` here carries the published GIF's absolute path (what
+ *  `copy_export_to_clipboard` needs), not a Library bundle id. */
+export async function exportGifReplay(id: string, keepSegments: Cut[]): Promise<ExportReplayResult> {
+  return invoke<string>("export_gif_replay", { id, keepSegments })
+    .then((path) => ({ ok: true as const, id: path }))
+    .catch((error: unknown) => ({ ok: false as const, error: errorCode(error) }));
+}
+
 function errorCode(error: unknown): string {
   return typeof error === "string" ? error : DEFAULT_ERROR;
 }

@@ -35,6 +35,17 @@
   white-space: nowrap;
 }
 
+/* GIF is always a re-encode (grilled decision): the lossless badge area
+   swaps to an attention-tinted notice instead of the green lossless dot. */
+.editor-badge--gif {
+  background: color-mix(in oklab, var(--attention) 14%, var(--surface-inset));
+  color: var(--attention);
+}
+
+.editor-badge--gif i {
+  background: var(--attention);
+}
+
 .editor-toolbar {
   display: flex;
   align-items: center;
@@ -70,16 +81,33 @@
 
 .editor-export-bar__format {
   padding: 4px 10px;
+  border: 0;
   border-radius: 999px;
+  background: transparent;
   color: var(--ink-faint);
   font: 700 9.5px/1 var(--font-mono);
   letter-spacing: 0.04em;
+  cursor: pointer;
 }
 
 .editor-export-bar__format--active {
   background: var(--surface-inset);
   color: var(--ink-secondary);
 }
+
+.editor-export-bar__copy {
+  height: 26px;
+  padding: 0 12px;
+  border: 1px solid var(--hairline);
+  border-radius: 13px;
+  background: var(--surface-inset);
+  color: var(--ink-secondary);
+  font-size: 10.5px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.editor-export-bar__copy:disabled { opacity: 0.6; cursor: default; }
 
 .editor-export-bar__destination {
   color: var(--ink-muted);

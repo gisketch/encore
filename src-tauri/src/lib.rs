@@ -11,8 +11,10 @@ mod retention;
 
 use capture::{CaptureService, CaptureSnapshot, CaptureSource, DiagnosticRecord, SettingsSnapshot};
 use diagnostics::DiagnosticLog;
-use editor::commands::{editor_context, editor_header, editor_keyframes, open_editor_window};
-use editor::export::commands::export_trimmed_replay;
+use editor::commands::{
+    copy_export_to_clipboard, editor_context, editor_header, editor_keyframes, open_editor_window,
+};
+use editor::export::commands::{export_gif_replay, export_trimmed_replay};
 use replay::{ReplayService, ReplaySnapshot};
 use tauri::{Emitter, Manager};
 
@@ -332,6 +334,8 @@ pub fn run() {
             editor_header,
             editor_keyframes,
             export_trimmed_replay,
+            export_gif_replay,
+            copy_export_to_clipboard,
             settings_snapshot,
             update_appearance,
             update_default_source,
