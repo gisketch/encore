@@ -1,9 +1,13 @@
+import type { PersistedTarget } from "./recordingSettings";
+
 export type Appearance = "light" | "dark" | "system";
 
 /** Snapshot shape shared by `settings_snapshot` and the `settings-changed`
  *  event; grows as later tickets add settings sections. */
 export type SettingsSnapshot = {
   appearance: Appearance;
+  retention_minutes: 5 | 10;
+  default_target: PersistedTarget;
 };
 
 const APPLY: Record<Appearance, () => void> = {

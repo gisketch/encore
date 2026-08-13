@@ -6,7 +6,7 @@ use crate::capture::settings::{self, PersistedTarget, SettingsDocument};
 /// best-effort identity and falling back to the default display with a
 /// visible notice when it cannot be found.
 pub(super) fn start_from_persisted(service: &CaptureService) -> Result<CaptureSnapshot, String> {
-    let target = service.0.startup_target.clone();
+    let target = service.default_target();
     let resolved = service
         .list_sources()
         .ok()
@@ -32,6 +32,7 @@ pub(super) fn persist(service: &CaptureService) {
         .as_ref()
         .map(PersistedTarget::from_source)
         .unwrap_or_default();
+    service.sync_default_target(target.clone());
     let document = SettingsDocument::new(snapshot.retention.minutes, target, service.appearance());
     let _ = service.0.settings.save(&document);
 }

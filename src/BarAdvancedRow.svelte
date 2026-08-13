@@ -11,14 +11,12 @@
   let {
     sources,
     sourceId,
-    retentionMinutes,
     retainedBytes,
     selectDisabled,
     capture,
     busy,
     native,
     onSwitchSource,
-    onSetRetention,
     onPause,
     onResume,
     onOpenSettings,
@@ -26,14 +24,12 @@
   }: {
     sources: CaptureSource[];
     sourceId: string;
-    retentionMinutes: 5 | 10;
     retainedBytes: number;
     selectDisabled: boolean;
     capture: CaptureState;
     busy: boolean;
     native: boolean;
     onSwitchSource: (sourceId: string) => void;
-    onSetRetention: (minutes: 5 | 10) => void;
     onPause: () => void;
     onResume: () => void;
     onOpenSettings: () => void;
@@ -64,11 +60,6 @@
       {#each sources as source}<option value={source.id}>{source.label}</option>{/each}
     </select>
   </label>
-
-  <div class="retention" aria-label="Replay duration">
-    <button class:active={retentionMinutes === 5} type="button" aria-pressed={retentionMinutes === 5} onclick={() => onSetRetention(5)} disabled={busy}>5m</button>
-    <button class:active={retentionMinutes === 10} type="button" aria-pressed={retentionMinutes === 10} onclick={() => onSetRetention(10)} disabled={busy}>10m</button>
-  </div>
 
   <button class="pill-control pause-control" type="button" onclick={pauseAction} disabled={pauseDisabled} title="Pause or resume capture, keeping retained evidence">
     <span class="pause-icon" aria-hidden="true"><i></i><i></i></span>

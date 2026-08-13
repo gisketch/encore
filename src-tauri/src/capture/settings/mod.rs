@@ -16,7 +16,7 @@ const VALID_APPEARANCES: [&str; 3] = ["light", "dark", "system"];
 /// resolve by app bundle plus title; there is no stable id across launches.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(tag = "kind", rename_all = "snake_case")]
-pub(crate) enum PersistedTarget {
+pub enum PersistedTarget {
     #[default]
     Display,
     Window {
@@ -118,12 +118,16 @@ impl SettingsDocument {
 #[derive(Debug, Clone, Serialize)]
 pub struct SettingsSnapshot {
     pub appearance: String,
+    pub retention_minutes: u8,
+    pub default_target: PersistedTarget,
 }
 
 impl From<&SettingsDocument> for SettingsSnapshot {
     fn from(document: &SettingsDocument) -> Self {
         Self {
             appearance: document.appearance.clone(),
+            retention_minutes: document.retention_minutes,
+            default_target: document.target.clone(),
         }
     }
 }

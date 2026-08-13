@@ -387,3 +387,27 @@ lane before declaring the migration complete.
   tests, 4 new covering round-trip, missing-field default, and
   corrupt-value tolerance), svelte-check/build clean, SCC and sonata gates
   pass.
+- 2026-08-13: PG-05 implemented. Settings gains a Recording section (above
+  General): "Replay window" (5/10 min pill select) calls the existing
+  `set_retention_minutes` — untouched, so the bar sub-line keeps reflecting
+  it via `capture-state-changed` as before — and "Default source" (pill
+  select over `list_capture_sources`) calls a new `update_default_source`
+  command that resolves the id and persists it as the launch target without
+  touching live capture. On the Rust side, `CaptureService`'s old
+  `startup_target` field became `default_target: RwLock<PersistedTarget>`,
+  a small independently-cached slice (mirroring the `appearance` pattern)
+  that both the bar's live source switch (`persistence::persist`) and the
+  new Settings path (`default_source::set_default_source_by_id`) write to,
+  last write wins, matching the spec's "default source applies at next
+  launch; bar stays the only live switcher." `SettingsSnapshot` grew
+  `retention_minutes` and `default_target` fields so the Settings window can
+  show the current values on open. The retention 5m/10m toggle and its
+  `onSetRetention` plumbing are removed from `BarAdvancedRow`/`CaptureShell`
+  (and the now-dead `.retention` CSS rule from `app.css`), leaving
+  pause/settings/buffer/quit in the advanced row per PG-05's contract.
+  New frontend files (`recordingSettings.ts`, `SettingsRecordingSection.svelte`)
+  keep the source-matching branching out of the SCC-gated tracked files.
+  Validation: cargo fmt/clippy/test (95 Rust tests, 4 new covering the
+  default-source persistence path — round trip, cache sync, field
+  preservation, unknown-id tolerance), svelte-check/build clean, SCC and
+  sonata gates pass.

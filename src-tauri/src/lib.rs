@@ -142,6 +142,8 @@ fn open_settings_window(app: tauri::AppHandle) -> Result<(), String> {
 fn settings_snapshot(service: tauri::State<'_, CaptureService>) -> SettingsSnapshot {
     SettingsSnapshot {
         appearance: service.appearance(),
+        retention_minutes: service.snapshot().retention.minutes,
+        default_target: service.default_target(),
     }
 }
 
@@ -152,9 +154,21 @@ fn update_appearance(
     appearance: String,
 ) -> Result<SettingsSnapshot, String> {
     let appearance = service.set_appearance(appearance)?;
-    let snapshot = SettingsSnapshot { appearance };
+    let snapshot = SettingsSnapshot {
+        appearance,
+        retention_minutes: service.snapshot().retention.minutes,
+        default_target: service.default_target(),
+    };
     let _ = app.emit("settings-changed", snapshot.clone());
     Ok(snapshot)
+}
+
+#[tauri::command]
+fn update_default_source(
+    service: tauri::State<'_, CaptureService>,
+    source_id: String,
+) -> Result<SettingsSnapshot, String> {
+    service.set_default_source_by_id(&source_id)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -216,7 +230,8 @@ pub fn run() {
             quit_encore,
             open_settings_window,
             settings_snapshot,
-            update_appearance
+            update_appearance,
+            update_default_source
         ])
         .run(tauri::generate_context!())
         .expect("error while running Encore");

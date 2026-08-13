@@ -196,10 +196,6 @@
     });
   }
 
-  function setRetention(minutes: 5 | 10) {
-    return run(() => invoke<CaptureSnapshot>("set_retention_minutes", { minutes }));
-  }
-
   async function triggerReplay() {
     replayBusy = true;
     actionError = null;
@@ -314,14 +310,12 @@
       <BarAdvancedRow
         {sources}
         sourceId={snapshot.source?.id ?? ""}
-        retentionMinutes={snapshot.retention.minutes}
         retainedBytes={snapshot.retention.retainedBytes}
         selectDisabled={snapshot.permission !== "granted" || sources.length === 0 || busy}
         capture={snapshot.capture}
         {busy}
         {native}
         onSwitchSource={switchSource}
-        onSetRetention={setRetention}
         onPause={pauseCapture}
         onResume={resumeCapture}
         onOpenSettings={openSettings}

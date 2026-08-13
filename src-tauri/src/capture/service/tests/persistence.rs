@@ -24,7 +24,7 @@ fn service_with_startup_target(target: PersistedTarget) -> CaptureService {
         encoder_controls,
         rolling: RollingStore::empty_for_tests(),
         settings: scratch_settings_store(),
-        startup_target: target,
+        default_target: RwLock::new(target),
         appearance: RwLock::new("system".into()),
         diagnostics: DiagnosticLog::disabled(),
         user_paused: AtomicBool::new(false),
@@ -97,4 +97,58 @@ fn switching_source_persists_it_for_the_next_launch() {
             title: "window:2".into(),
         }
     );
+}
+
+#[test]
+fn setting_default_source_persists_without_switching_live_capture() {
+    let service = service_with_startup_target(PersistedTarget::Display);
+
+    let snapshot = service.set_default_source_by_id("window:2").unwrap();
+
+    assert_eq!(
+        snapshot.default_target,
+        PersistedTarget::Window {
+            bundle_id: "com.example.app".into(),
+            title: "window:2".into(),
+        }
+    );
+    assert_eq!(service.snapshot().source, None);
+    assert_eq!(service.snapshot().capture, CaptureState::Stopped);
+}
+
+#[test]
+fn default_source_round_trips_through_disk_and_the_in_memory_cache() {
+    let service = service_with_startup_target(PersistedTarget::Display);
+
+    service.set_default_source_by_id("window:2").unwrap();
+
+    let expected = PersistedTarget::Window {
+        bundle_id: "com.example.app".into(),
+        title: "window:2".into(),
+    };
+    assert_eq!(service.default_target(), expected);
+    assert_eq!(service.0.settings.load().target, expected);
+}
+
+#[test]
+fn default_source_update_preserves_other_persisted_fields() {
+    let service = service_with_startup_target(PersistedTarget::Display);
+    service.set_retention_minutes(5).unwrap();
+
+    service.set_default_source_by_id("window:2").unwrap();
+
+    let reloaded = service.0.settings.load();
+    assert_eq!(reloaded.retention_minutes, 5);
+    assert_eq!(reloaded.appearance, "system");
+}
+
+#[test]
+fn unknown_default_source_id_is_rejected_without_touching_the_persisted_target() {
+    let service = service_with_startup_target(PersistedTarget::Display);
+
+    let result = service.set_default_source_by_id("window:missing");
+
+    assert_eq!(result.unwrap_err(), "source_unavailable");
+    assert_eq!(service.default_target(), PersistedTarget::Display);
+    assert_eq!(service.0.settings.load().target, PersistedTarget::Display);
 }

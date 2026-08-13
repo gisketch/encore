@@ -2,6 +2,7 @@
   import { getCurrentWindow } from "@tauri-apps/api/window";
   import type { Appearance } from "./appearance";
   import SettingsAppearanceControl from "./SettingsAppearanceControl.svelte";
+  import SettingsRecordingSection from "./SettingsRecordingSection.svelte";
 
   let { appearance, onSetAppearance }: {
     appearance: Appearance;
@@ -34,6 +35,8 @@
     </header>
 
     <div class="settings-body">
+      <SettingsRecordingSection />
+
       <section class="settings-section" aria-labelledby="general-heading">
         <h2 id="general-heading" class="settings-section__title">General</h2>
         <div class="settings-row">

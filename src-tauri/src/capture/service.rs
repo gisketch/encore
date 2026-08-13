@@ -1,5 +1,6 @@
 mod appearance;
 mod control;
+mod default_source;
 mod diagnostics;
 mod monitor;
 mod pause;
@@ -48,7 +49,10 @@ struct Inner {
     encoder_controls: Sender<EncoderCommand>,
     rolling: RollingStore,
     settings: SettingsStore,
-    startup_target: PersistedTarget,
+    // Doubles as the launch-time capture target and the Settings window's
+    // "default source" display value: switching live source (bar) and
+    // choosing a default (Settings) both write here, last write wins.
+    default_target: RwLock<PersistedTarget>,
     appearance: RwLock<String>,
     diagnostics: DiagnosticLog,
     // Distinguishes an explicit user pause (stream torn down, must stay
@@ -101,7 +105,7 @@ impl CaptureService {
             encoder_controls,
             rolling,
             settings,
-            startup_target: document.target,
+            default_target: RwLock::new(document.target),
             appearance: RwLock::new(document.appearance),
             diagnostics,
             user_paused: AtomicBool::new(false),

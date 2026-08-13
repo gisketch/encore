@@ -93,7 +93,7 @@
       return {
         label: "Paused",
         tone: "attention",
-        detail: `Not recording — keeping last ${snapshot.retention.minutes} min`,
+        detail: `Not recording — keeping the ${snapshot.retention.minutes} min before pause`,
       };
     }
     return { ...captureLabels[snapshot.capture], detail: defaultDetail() };
