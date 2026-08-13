@@ -211,6 +211,11 @@ select:focus-visible {
   gap: 6px;
 }
 
+.source-unavailable-actions {
+  display: flex;
+  gap: 6px;
+}
+
 .primary-action {
   height: 40px;
   flex: 0 0 auto;
@@ -336,6 +341,26 @@ select:focus-visible {
 }
 
 .source-control select:disabled { opacity: 0.48; cursor: default; }
+
+.pause-icon {
+  display: flex;
+  align-items: center;
+  gap: 2.5px;
+}
+
+.pause-icon i {
+  width: 3px;
+  height: 11px;
+  border-radius: 1px;
+  background: var(--icon-stroke);
+}
+
+.pause-control:disabled {
+  color: var(--ink-faint);
+  cursor: not-allowed;
+}
+
+.pause-control:disabled .pause-icon i { background: var(--icon-soft); }
 
 .retention {
   height: 36px;

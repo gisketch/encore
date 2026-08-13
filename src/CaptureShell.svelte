@@ -175,6 +175,10 @@
     return run(() => invoke<CaptureSnapshot>("retry_capture"));
   }
 
+  function fallbackToFullScreen() {
+    return run(() => invoke<CaptureSnapshot>("start_capture"));
+  }
+
   function pauseCapture() {
     return run(() => invoke<CaptureSnapshot>("pause_capture"));
   }
@@ -284,8 +288,7 @@
         onOpenSettings={() => invoke("open_screen_recording_settings")}
         onQuit={() => invoke("quit_encore")}
         onRetry={retryCapture}
-        onPause={pauseCapture}
-        onResume={resumeCapture}
+        onFallbackToFullScreen={fallbackToFullScreen}
         onTrigger={triggerReplay}
         onRetryReplay={retryReplay}
         onRevealReplay={revealSavedReplay}
@@ -310,10 +313,13 @@
         retentionMinutes={snapshot.retention.minutes}
         retainedBytes={snapshot.retention.retainedBytes}
         selectDisabled={snapshot.permission !== "granted" || sources.length === 0 || busy}
+        capture={snapshot.capture}
         {busy}
         {native}
         onSwitchSource={switchSource}
         onSetRetention={setRetention}
+        onPause={pauseCapture}
+        onResume={resumeCapture}
         onQuit={() => invoke("quit_encore")}
       />
     {/if}
