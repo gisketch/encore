@@ -44,6 +44,21 @@
         "alwaysOnTop": false,
         "center": true,
         "visible": false
+      },
+      {
+        "label": "library",
+        "title": "Library",
+        "width": 1060,
+        "height": 640,
+        "resizable": true,
+        "maximizable": false,
+        "minimizable": false,
+        "decorations": false,
+        "transparent": true,
+        "shadow": false,
+        "alwaysOnTop": false,
+        "center": true,
+        "visible": false
       }
     ],
     "security": {

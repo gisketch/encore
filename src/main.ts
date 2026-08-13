@@ -3,6 +3,7 @@ import App from "./App.svelte";
 import "./theme.css";
 import "./app.css";
 import "./settings.css";
+import "./library.css";
 
 const target = document.getElementById("app");
 

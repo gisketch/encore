@@ -3,6 +3,7 @@ mod desktop;
 mod diagnostics;
 mod encoder;
 mod hotkeys;
+mod library;
 mod packager;
 mod replay;
 mod retention;
@@ -116,7 +117,22 @@ fn open_screen_recording_settings() -> Result<(), String> {
 
 #[tauri::command]
 fn open_export_folder(service: tauri::State<'_, CaptureService>) -> Result<(), String> {
-    service.open_library()
+    service.reveal_export_folder()
+}
+
+#[tauri::command]
+fn open_library_window(app: tauri::AppHandle) -> Result<(), String> {
+    desktop::open_library_window(&app)
+}
+
+#[tauri::command]
+fn library_index(service: tauri::State<'_, CaptureService>) -> library::LibraryIndex {
+    library::index(&service.resolved_save_destination())
+}
+
+#[tauri::command]
+fn open_replay_file(service: tauri::State<'_, CaptureService>, id: String) -> Result<(), String> {
+    library::open_replay_file(&service.resolved_save_destination(), &id)
 }
 
 #[tauri::command]
@@ -268,6 +284,9 @@ pub fn run() {
             open_export_folder,
             quit_encore,
             open_settings_window,
+            open_library_window,
+            library_index,
+            open_replay_file,
             settings_snapshot,
             update_appearance,
             update_default_source,

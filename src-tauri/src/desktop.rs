@@ -62,6 +62,19 @@ pub fn open_settings_window(app: &tauri::AppHandle) -> Result<(), String> {
         .map_err(|_| "settings_window_open_failed".to_string())
 }
 
+/// Shows and focuses the Library window, mirroring
+/// `open_settings_window` — `tauri.conf.json` declares it hidden at
+/// startup so it never flashes before the bar does.
+pub fn open_library_window(app: &tauri::AppHandle) -> Result<(), String> {
+    let window = app
+        .get_webview_window("library")
+        .ok_or_else(|| "library_window_unavailable".to_string())?;
+    window
+        .show()
+        .and_then(|_| window.set_focus())
+        .map_err(|_| "library_window_open_failed".to_string())
+}
+
 fn position_floating_window(window: &tauri::WebviewWindow) -> tauri::Result<()> {
     let Some(monitor) = window.current_monitor()?.or(window.primary_monitor()?) else {
         return Ok(());

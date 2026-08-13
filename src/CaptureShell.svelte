@@ -245,7 +245,7 @@
   }
 
   function openLibrary() {
-    void invoke("open_export_folder").catch(showError);
+    void invoke("open_library_window").catch(showError);
   }
 
   function openSettings() {

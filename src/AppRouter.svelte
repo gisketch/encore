@@ -5,6 +5,7 @@
   import { onMount } from "svelte";
   import { applyAppearance, type Appearance, type SettingsSnapshot } from "./appearance";
   import CaptureShell from "./CaptureShell.svelte";
+  import LibraryWindow from "./LibraryWindow.svelte";
   import SettingsWindow from "./SettingsWindow.svelte";
 
   const native = isTauri();
@@ -34,5 +35,9 @@
 {#if label === "settings"}
   <SettingsWindow {appearance} onSetAppearance={setAppearance} />
 {:else}
-  <CaptureShell />
+  {#if label === "library"}
+    <LibraryWindow />
+  {:else}
+    <CaptureShell />
+  {/if}
 {/if}
