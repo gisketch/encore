@@ -145,6 +145,30 @@
 
 .settings-select select:disabled { opacity: 0.48; cursor: default; }
 
+.settings-row__path {
+  max-width: 260px;
+  overflow: hidden;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-pill-button {
+  flex: 0 0 auto;
+  height: 30px;
+  padding: 0 14px;
+  border: 1px solid var(--hairline);
+  border-radius: 15px;
+  background: var(--surface-raised);
+  color: var(--ink-secondary);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.settings-pill-button:disabled { opacity: 0.48; cursor: default; }
+
 .appearance-control {
   display: flex;
   padding: 3px;

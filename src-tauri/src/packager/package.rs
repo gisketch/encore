@@ -88,38 +88,39 @@ impl PackageFileSystem for SystemPackageFileSystem {
 }
 
 pub(crate) struct ReplayPackager {
-    destination: PathBuf,
     runner: Arc<dyn FfmpegRunner>,
     files: Arc<dyn PackageFileSystem>,
 }
 
 impl ReplayPackager {
-    pub(crate) fn new(destination: PathBuf, runner: Arc<dyn FfmpegRunner>) -> Self {
-        Self::with_files(destination, runner, Arc::new(SystemPackageFileSystem))
+    pub(crate) fn new(runner: Arc<dyn FfmpegRunner>) -> Self {
+        Self::with_files(runner, Arc::new(SystemPackageFileSystem))
     }
 
     pub(crate) fn with_files(
-        destination: PathBuf,
         runner: Arc<dyn FfmpegRunner>,
         files: Arc<dyn PackageFileSystem>,
     ) -> Self {
-        Self {
-            destination,
-            runner,
-            files,
-        }
+        Self { runner, files }
     }
 
-    pub(crate) fn package(&self, request: &PackageRequest<'_>) -> Result<SavedReplay, String> {
+    /// Packages `request` into `destination`, resolved by the caller for
+    /// THIS save rather than fixed at construction — so a destination
+    /// change in Settings takes effect on the very next save.
+    pub(crate) fn package(
+        &self,
+        request: &PackageRequest<'_>,
+        destination: &Path,
+    ) -> Result<SavedReplay, String> {
         self.validate_inputs(request)?;
         self.files
-            .create_dir_all(&self.destination)
+            .create_dir_all(destination)
             .map_err(|_| "export_destination_unavailable".to_string())?;
-        cleanup_interrupted_workspaces(self.files.as_ref(), &self.destination)?;
+        cleanup_interrupted_workspaces(self.files.as_ref(), destination)?;
 
         for suffix in 0..=MAX_NAME_SUFFIX {
             let display_name = display_name(request.created_at_unix_ms, suffix)?;
-            let completed = self.destination.join(&display_name);
+            let completed = destination.join(&display_name);
             if self
                 .files
                 .try_exists(&completed)
@@ -128,15 +129,13 @@ impl ReplayPackager {
                 continue;
             }
 
-            let lock = self
-                .destination
-                .join(format!(".{display_name}.lock-{}", std::process::id()));
+            let lock = destination.join(format!(".{display_name}.lock-{}", std::process::id()));
             match self.files.create_lock(&lock) {
                 Ok(()) => {}
                 Err(error) if error.kind() == io::ErrorKind::AlreadyExists => continue,
                 Err(_) => return Err("export_destination_unavailable".into()),
             }
-            let partial = self.destination.join(format!(
+            let partial = destination.join(format!(
                 ".{display_name}.partial-{}-{}",
                 std::process::id(),
                 PARTIAL_NONCE.fetch_add(1, Ordering::Relaxed)
@@ -172,7 +171,7 @@ impl ReplayPackager {
             }
             workspace.mark_published();
             self.files
-                .sync_dir(&self.destination)
+                .sync_dir(destination)
                 .map_err(|_| "export_destination_unavailable".to_string())?;
             return Ok(SavedReplay {
                 id: request.replay_id.to_owned(),

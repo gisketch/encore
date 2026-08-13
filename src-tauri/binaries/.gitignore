@@ -1,0 +1,3 @@
+# `npm run prepare:ffmpeg-sidecars` generates target-specific executable sidecars here.
+*
+!.gitignore

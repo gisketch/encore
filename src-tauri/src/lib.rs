@@ -114,12 +114,8 @@ fn open_screen_recording_settings() -> Result<(), String> {
 }
 
 #[tauri::command]
-fn open_export_folder(app: tauri::AppHandle) -> Result<(), String> {
-    let folder = app
-        .path()
-        .video_dir()
-        .map_err(|_| "export_folder_unavailable".to_string())?
-        .join("Encore");
+fn open_export_folder(service: tauri::State<'_, CaptureService>) -> Result<(), String> {
+    let folder = service.resolved_save_destination();
     std::fs::create_dir_all(&folder).map_err(|_| "export_folder_unavailable".to_string())?;
     std::process::Command::new("open")
         .arg(&folder)
@@ -140,11 +136,7 @@ fn open_settings_window(app: tauri::AppHandle) -> Result<(), String> {
 
 #[tauri::command]
 fn settings_snapshot(service: tauri::State<'_, CaptureService>) -> SettingsSnapshot {
-    SettingsSnapshot {
-        appearance: service.appearance(),
-        retention_minutes: service.snapshot().retention.minutes,
-        default_target: service.default_target(),
-    }
+    service.settings_snapshot()
 }
 
 #[tauri::command]
@@ -153,28 +145,53 @@ fn update_appearance(
     service: tauri::State<'_, CaptureService>,
     appearance: String,
 ) -> Result<SettingsSnapshot, String> {
-    let appearance = service.set_appearance(appearance)?;
-    let snapshot = SettingsSnapshot {
-        appearance,
-        retention_minutes: service.snapshot().retention.minutes,
-        default_target: service.default_target(),
-    };
-    let _ = app.emit("settings-changed", snapshot.clone());
-    Ok(snapshot)
+    service.set_appearance(appearance)?;
+    Ok(broadcast_settings(&app, service.inner()))
 }
 
 #[tauri::command]
 fn update_default_source(
+    app: tauri::AppHandle,
     service: tauri::State<'_, CaptureService>,
     source_id: String,
 ) -> Result<SettingsSnapshot, String> {
-    service.set_default_source_by_id(&source_id)
+    service.set_default_source_by_id(&source_id)?;
+    Ok(broadcast_settings(&app, service.inner()))
+}
+
+#[tauri::command]
+fn update_save_destination(
+    app: tauri::AppHandle,
+    service: tauri::State<'_, CaptureService>,
+    path: String,
+) -> Result<SettingsSnapshot, String> {
+    service.set_save_destination(Some(std::path::PathBuf::from(path)))?;
+    Ok(broadcast_settings(&app, service.inner()))
+}
+
+#[tauri::command]
+fn update_after_save(
+    app: tauri::AppHandle,
+    service: tauri::State<'_, CaptureService>,
+    after_save: String,
+) -> Result<SettingsSnapshot, String> {
+    service.set_after_save(after_save)?;
+    Ok(broadcast_settings(&app, service.inner()))
+}
+
+/// Reads the current settings snapshot and broadcasts it to every window,
+/// so commands that change a single field don't each have to remember to.
+fn broadcast_settings(app: &tauri::AppHandle, service: &CaptureService) -> SettingsSnapshot {
+    let snapshot = service.settings_snapshot();
+    let _ = app.emit("settings-changed", snapshot.clone());
+    snapshot
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+        .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             desktop::setup(app)?;
             let settings_path = app
@@ -190,15 +207,10 @@ pub fn run() {
             let diagnostics = DiagnosticLog::open(diagnostics_path);
             let capture =
                 CaptureService::new(app.handle().clone(), settings_path, diagnostics.clone());
-            let replay_destination = app
-                .path()
-                .video_dir()
-                .map_err(std::io::Error::other)?
-                .join("Encore");
             let replay = ReplayService::new(
                 capture.rolling_store(),
                 capture.clone(),
-                replay_destination,
+                capture.destination_lookup(),
                 diagnostics,
             )
             .map_err(std::io::Error::other)?;
@@ -231,7 +243,9 @@ pub fn run() {
             open_settings_window,
             settings_snapshot,
             update_appearance,
-            update_default_source
+            update_default_source,
+            update_save_destination,
+            update_after_save
         ])
         .run(tauri::generate_context!())
         .expect("error while running Encore");

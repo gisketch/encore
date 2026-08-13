@@ -34,7 +34,7 @@
         "label": "settings",
         "title": "Settings",
         "width": 560,
-        "height": 320,
+        "height": 480,
         "resizable": false,
         "maximizable": false,
         "minimizable": false,

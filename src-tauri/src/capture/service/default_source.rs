@@ -39,11 +39,7 @@ impl CaptureService {
         let target = PersistedTarget::from_source(&source);
         self.sync_default_target(target.clone());
         self.persist_default_target_only(&target);
-        Ok(SettingsSnapshot {
-            appearance: self.appearance(),
-            retention_minutes: self.snapshot().retention.minutes,
-            default_target: target,
-        })
+        Ok(self.settings_snapshot())
     }
 
     fn persist_default_target_only(&self, target: &PersistedTarget) {
@@ -51,6 +47,8 @@ impl CaptureService {
             self.snapshot().retention.minutes,
             target.clone(),
             self.appearance(),
+            self.save_destination(),
+            self.after_save(),
         );
         let _ = self.0.settings.save(&document);
     }

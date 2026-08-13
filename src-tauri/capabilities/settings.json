@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "settings",
+  "description": "Dialog access for the Settings window's folder picker",
+  "windows": ["settings"],
+  "permissions": ["core:default", "dialog:allow-open"]
+}

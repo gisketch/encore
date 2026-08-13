@@ -81,7 +81,8 @@ fn emit_dispatch(
 fn dispatch_export(app: AppHandle, service: ReplayService, replay_id: String) {
     thread::spawn(move || {
         let snapshot = service.run_export(&replay_id);
-        emit_replay_state(&app, snapshot);
+        emit_replay_state(&app, snapshot.clone());
+        super::after_save::honor_after_save(&app, &service, &snapshot);
     });
 }
 

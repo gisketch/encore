@@ -22,6 +22,8 @@ use std::{
 
 static NEXT_DIRECTORY: AtomicU64 = AtomicU64::new(1);
 
+#[path = "tests/destination.rs"]
+mod destination;
 #[path = "tests/lifecycle.rs"]
 mod lifecycle;
 
@@ -141,10 +143,10 @@ fn service_with_clock(rolling: RollingStore, clock: Arc<dyn ReplayClock>) -> Rep
     ReplayService::with_test_parts(
         rolling,
         clock,
-        Arc::new(ReplayPackager::new(
-            destination,
-            Arc::new(ConfigurableRunner::new(Ok(()))),
-        )),
+        Arc::new(ReplayPackager::new(Arc::new(ConfigurableRunner::new(Ok(
+            (),
+        ))))),
+        destination::fixed(destination),
         Arc::new(|_| Ok(())),
     )
 }

@@ -23,7 +23,7 @@ fn compatible_segments_publish_one_complete_schema_v1_bundle() {
     let store = store_with_segments(&segments, &["display:1", "display:1"]);
     let lease = store.lease().unwrap();
     let runner = Arc::new(FakeRunner::compatible(2));
-    let packager = ReplayPackager::new(destination.path().to_owned(), runner.clone());
+    let packager = ReplayPackager::new(runner.clone());
     let request = PackageRequest {
         replay_id: "replay-19",
         created_at_unix_ms: 1_725_000_000_000,
@@ -31,7 +31,7 @@ fn compatible_segments_publish_one_complete_schema_v1_bundle() {
         capture: capture_facts(),
     };
 
-    let saved = packager.package(&request).unwrap();
+    let saved = packager.package(&request, destination.path()).unwrap();
 
     assert!(saved.replay_file.is_file());
     assert_eq!(fs::read(&saved.replay_file).unwrap(), b"golden-h264-mp4");
@@ -69,10 +69,7 @@ fn source_or_media_mismatch_fails_without_consuming_the_caller_lease() {
     let destination = TestDirectory::new("destination");
     let store = store_with_segments(&segments, &["display:1", "display:2"]);
     let lease = store.lease().unwrap();
-    let packager = ReplayPackager::new(
-        destination.path().to_owned(),
-        Arc::new(FakeRunner::compatible(2)),
-    );
+    let packager = ReplayPackager::new(Arc::new(FakeRunner::compatible(2)));
     let request = PackageRequest {
         replay_id: "replay-20",
         created_at_unix_ms: 1_725_000_000_000,
@@ -81,7 +78,7 @@ fn source_or_media_mismatch_fails_without_consuming_the_caller_lease() {
     };
 
     assert_eq!(
-        packager.package(&request),
+        packager.package(&request, destination.path()),
         Err("export_incompatible_segments".into())
     );
     assert!(segments.path().join("segment-10000-000000.mp4").exists());
@@ -100,18 +97,18 @@ fn recovered_segments_with_unknown_source_ids_package_when_media_matches() {
         .segments()
         .iter()
         .all(|segment| segment.source_id().is_none()));
-    let packager = ReplayPackager::new(
-        destination.path().to_owned(),
-        Arc::new(FakeRunner::compatible(2)),
-    );
+    let packager = ReplayPackager::new(Arc::new(FakeRunner::compatible(2)));
 
     let saved = packager
-        .package(&PackageRequest {
-            replay_id: "recovered-replay",
-            created_at_unix_ms: 1_725_000_000_000,
-            lease: &lease,
-            capture: capture_facts(),
-        })
+        .package(
+            &PackageRequest {
+                replay_id: "recovered-replay",
+                created_at_unix_ms: 1_725_000_000_000,
+                lease: &lease,
+                capture: capture_facts(),
+            },
+            destination.path(),
+        )
         .unwrap();
 
     assert!(saved.replay_file.is_file());
@@ -134,7 +131,7 @@ fn codec_geometry_or_stream_layout_mismatch_fails_before_concat() {
         concat_result: Ok(()),
         manifest: Mutex::new(None),
     };
-    let packager = ReplayPackager::new(destination.path().to_owned(), Arc::new(runner));
+    let packager = ReplayPackager::new(Arc::new(runner));
     let request = PackageRequest {
         replay_id: "replay-20-media",
         created_at_unix_ms: 1_725_000_000_000,
@@ -143,7 +140,7 @@ fn codec_geometry_or_stream_layout_mismatch_fails_before_concat() {
     };
 
     assert_eq!(
-        packager.package(&request),
+        packager.package(&request, destination.path()),
         Err("export_incompatible_segments".into())
     );
     assert_eq!(fs::read_dir(destination.path()).unwrap().count(), 0);
@@ -161,12 +158,11 @@ fn sidecar_failures_are_typed_and_leave_no_partial_bundle() {
         lease: &lease,
         capture: capture_facts(),
     };
-    let missing = ReplayPackager::new(
-        destination.path().to_owned(),
-        Arc::new(FakeRunner::failing_inspection(RunnerFailure::Unavailable)),
-    );
+    let missing = ReplayPackager::new(Arc::new(FakeRunner::failing_inspection(
+        RunnerFailure::Unavailable,
+    )));
     assert_eq!(
-        missing.package(&request),
+        missing.package(&request, destination.path()),
         Err("export_ffmpeg_unavailable".into())
     );
 
@@ -175,9 +171,9 @@ fn sidecar_failures_are_typed_and_leave_no_partial_bundle() {
         concat_result: Err(RunnerFailure::Failed),
         manifest: Mutex::new(None),
     };
-    let packager = ReplayPackager::new(destination.path().to_owned(), Arc::new(failed_concat));
+    let packager = ReplayPackager::new(Arc::new(failed_concat));
     assert_eq!(
-        packager.package(&request),
+        packager.package(&request, destination.path()),
         Err("export_concat_failed".into())
     );
     assert_eq!(fs::read_dir(destination.path()).unwrap().count(), 0);
@@ -193,10 +189,7 @@ fn collisions_get_a_suffix_without_overwriting_a_completed_bundle() {
     let original = destination.path().join(display_name(created, 0).unwrap());
     fs::create_dir(&original).unwrap();
     fs::write(original.join("keep.txt"), b"existing evidence").unwrap();
-    let packager = ReplayPackager::new(
-        destination.path().to_owned(),
-        Arc::new(FakeRunner::compatible(1)),
-    );
+    let packager = ReplayPackager::new(Arc::new(FakeRunner::compatible(1)));
     let request = PackageRequest {
         replay_id: "replay-22",
         created_at_unix_ms: created,
@@ -204,7 +197,7 @@ fn collisions_get_a_suffix_without_overwriting_a_completed_bundle() {
         capture: capture_facts(),
     };
 
-    let saved = packager.package(&request).unwrap();
+    let saved = packager.package(&request, destination.path()).unwrap();
 
     assert_eq!(saved.display_name, display_name(created, 1).unwrap());
     assert_eq!(
@@ -220,7 +213,6 @@ fn injected_metadata_write_failure_cleans_the_hidden_workspace() {
     let store = store_with_segments(&segments, &["display:1"]);
     let lease = store.lease().unwrap();
     let packager = ReplayPackager::with_files(
-        destination.path().to_owned(),
         Arc::new(FakeRunner::compatible(1)),
         Arc::new(FailingMetadataFileSystem),
     );
@@ -232,7 +224,7 @@ fn injected_metadata_write_failure_cleans_the_hidden_workspace() {
     };
 
     assert_eq!(
-        packager.package(&request),
+        packager.package(&request, destination.path()),
         Err("export_metadata_failed".into())
     );
     assert_eq!(fs::read_dir(destination.path()).unwrap().count(), 0);
@@ -255,18 +247,18 @@ fn next_export_removes_only_dead_generated_partial_workspaces_and_locks() {
     fs::write(&unrelated, b"keep").unwrap();
     let store = store_with_segments(&segments, &["display:1"]);
     let lease = store.lease().unwrap();
-    let packager = ReplayPackager::new(
-        destination.path().to_owned(),
-        Arc::new(FakeRunner::compatible(1)),
-    );
+    let packager = ReplayPackager::new(Arc::new(FakeRunner::compatible(1)));
 
     packager
-        .package(&PackageRequest {
-            replay_id: "cleanup-replay",
-            created_at_unix_ms: 1_725_000_000_000,
-            lease: &lease,
-            capture: capture_facts(),
-        })
+        .package(
+            &PackageRequest {
+                replay_id: "cleanup-replay",
+                created_at_unix_ms: 1_725_000_000_000,
+                lease: &lease,
+                capture: capture_facts(),
+            },
+            destination.path(),
+        )
         .unwrap();
 
     assert!(!stale.exists());

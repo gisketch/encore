@@ -68,17 +68,17 @@ fn prepared_sidecars_package_h264_golden_media() {
             .unwrap();
     }
     let lease = store.lease().unwrap();
-    let packager = ReplayPackager::new(
-        destination.path().to_owned(),
-        Arc::new(ProcessFfmpegRunner::new(ffmpeg, ffprobe.clone())),
-    );
+    let packager = ReplayPackager::new(Arc::new(ProcessFfmpegRunner::new(ffmpeg, ffprobe.clone())));
     let saved = packager
-        .package(&PackageRequest {
-            replay_id: "golden-replay",
-            created_at_unix_ms: 1_725_000_000_000,
-            lease: &lease,
-            capture: capture_facts(),
-        })
+        .package(
+            &PackageRequest {
+                replay_id: "golden-replay",
+                created_at_unix_ms: 1_725_000_000_000,
+                lease: &lease,
+                capture: capture_facts(),
+            },
+            destination.path(),
+        )
         .unwrap();
     let output = Command::new(ffprobe)
         .args([

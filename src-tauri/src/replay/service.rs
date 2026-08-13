@@ -16,6 +16,7 @@ use std::{
 };
 
 type RevealSavedReplay = dyn Fn(&Path) -> Result<(), ()> + Send + Sync;
+type DestinationLookup = dyn Fn() -> PathBuf + Send + Sync;
 
 #[derive(Clone)]
 pub(crate) struct ReplayService(Arc<ReplayInner>);
@@ -24,6 +25,10 @@ struct ReplayInner {
     rolling: RollingStore,
     clock: Arc<dyn ReplayClock>,
     packager: Arc<ReplayPackager>,
+    // Resolved fresh for every save rather than fixed at construction, so a
+    // destination change in Settings takes effect on the next save without
+    // migrating files already written under the old one.
+    destination: Arc<DestinationLookup>,
     capture_facts: Arc<dyn Fn() -> EvidenceCaptureFacts + Send + Sync>,
     reveal: Arc<RevealSavedReplay>,
     state: Mutex<ReplayServiceState>,
@@ -67,7 +72,7 @@ impl ReplayService {
     pub(crate) fn new(
         rolling: RollingStore,
         capture: CaptureService,
-        destination: PathBuf,
+        destination: Arc<DestinationLookup>,
         diagnostics: DiagnosticLog,
     ) -> Result<Self, String> {
         let ffmpeg = current_sidecar_path("ffmpeg")?;
@@ -76,10 +81,10 @@ impl ReplayService {
         Ok(Self::with_parts(
             rolling,
             Arc::new(SystemReplayClock),
-            Arc::new(ReplayPackager::new(
-                destination,
-                Arc::new(ProcessFfmpegRunner::new(ffmpeg, ffprobe)),
-            )),
+            Arc::new(ReplayPackager::new(Arc::new(ProcessFfmpegRunner::new(
+                ffmpeg, ffprobe,
+            )))),
+            destination,
             capture_facts,
             Arc::new(reveal_in_finder),
             diagnostics,
@@ -159,12 +164,16 @@ impl ReplayService {
         let Some(task) = self.package_task(replay_id) else {
             return self.snapshot();
         };
-        let result = self.0.packager.package(&PackageRequest {
-            replay_id: &task.replay_id,
-            created_at_unix_ms: task.created_at_unix_ms,
-            lease: &task.lease,
-            capture: task.capture.clone(),
-        });
+        let destination = (self.0.destination)();
+        let result = self.0.packager.package(
+            &PackageRequest {
+                replay_id: &task.replay_id,
+                created_at_unix_ms: task.created_at_unix_ms,
+                lease: &task.lease,
+                capture: task.capture.clone(),
+            },
+            &destination,
+        );
         drop(task);
 
         let mut state = self.lock();
@@ -235,22 +244,26 @@ impl ReplayService {
         rolling: RollingStore,
         clock: Arc<dyn ReplayClock>,
         packager: Arc<ReplayPackager>,
+        destination: Arc<DestinationLookup>,
         reveal: Arc<RevealSavedReplay>,
     ) -> Self {
         Self::with_parts(
             rolling,
             clock,
             packager,
+            destination,
             Arc::new(EvidenceCaptureFacts::default),
             reveal,
             DiagnosticLog::disabled(),
         )
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn with_parts(
         rolling: RollingStore,
         clock: Arc<dyn ReplayClock>,
         packager: Arc<ReplayPackager>,
+        destination: Arc<DestinationLookup>,
         capture_facts: Arc<dyn Fn() -> EvidenceCaptureFacts + Send + Sync>,
         reveal: Arc<RevealSavedReplay>,
         diagnostics: DiagnosticLog,
@@ -259,6 +272,7 @@ impl ReplayService {
             rolling,
             clock,
             packager,
+            destination,
             capture_facts,
             reveal,
             state: Mutex::new(ReplayServiceState {

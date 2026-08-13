@@ -1,10 +1,13 @@
+mod after_save;
 mod store;
 #[cfg(test)]
 mod tests;
 
 use crate::capture::model::{CaptureSource, SourceKind};
 use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
 
+pub(crate) use after_save::valid as valid_after_save;
 pub(crate) use store::SettingsStore;
 
 const CURRENT_VERSION: u32 = 1;
@@ -47,6 +50,13 @@ pub(crate) struct SettingsDocument {
     pub target: PersistedTarget,
     #[serde(default = "default_appearance")]
     pub appearance: String,
+    /// Absent means "use the default `Movies/Encore` folder"; a resolved
+    /// current-launch default is never written here, so relocating the
+    /// default folder later does not silently strand existing users on it.
+    #[serde(default)]
+    pub save_destination: Option<PathBuf>,
+    #[serde(default = "after_save::default")]
+    pub after_save: String,
 }
 
 fn current_version() -> u32 {
@@ -74,24 +84,35 @@ impl Default for SettingsDocument {
             retention_minutes: DEFAULT_RETENTION_MINUTES,
             target: PersistedTarget::Display,
             appearance: DEFAULT_APPEARANCE.to_string(),
+            save_destination: None,
+            after_save: after_save::default(),
         }
     }
 }
 
 impl SettingsDocument {
-    pub(crate) fn new(retention_minutes: u8, target: PersistedTarget, appearance: String) -> Self {
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) fn new(
+        retention_minutes: u8,
+        target: PersistedTarget,
+        appearance: String,
+        save_destination: Option<PathBuf>,
+        after_save: String,
+    ) -> Self {
         Self {
             version: CURRENT_VERSION,
             retention_minutes,
             target,
             appearance,
+            save_destination,
+            after_save,
         }
     }
 
     /// Normalizes a freshly parsed document: an out-of-range retention value
-    /// or an unrecognized appearance (from a future schema or hand-edited
-    /// file) each fall back to their default rather than failing the whole
-    /// document.
+    /// or an unrecognized appearance/after-save choice (from a future schema
+    /// or hand-edited file) each fall back to their default rather than
+    /// failing the whole document.
     fn sanitized(self) -> Self {
         let retention_minutes = match self.retention_minutes {
             5 | 10 => self.retention_minutes,
@@ -107,6 +128,8 @@ impl SettingsDocument {
             retention_minutes,
             target: self.target,
             appearance,
+            save_destination: self.save_destination,
+            after_save: after_save::sanitized(self.after_save),
         }
     }
 }
@@ -120,16 +143,12 @@ pub struct SettingsSnapshot {
     pub appearance: String,
     pub retention_minutes: u8,
     pub default_target: PersistedTarget,
-}
-
-impl From<&SettingsDocument> for SettingsSnapshot {
-    fn from(document: &SettingsDocument) -> Self {
-        Self {
-            appearance: document.appearance.clone(),
-            retention_minutes: document.retention_minutes,
-            default_target: document.target.clone(),
-        }
-    }
+    /// The resolved destination replays are saved to right now: the
+    /// persisted custom folder, or the default `Movies/Encore` folder when
+    /// none is set. Always an absolute path, never `None`, so the frontend
+    /// never has to know about the default-folder fallback itself.
+    pub save_destination: PathBuf,
+    pub after_save: String,
 }
 
 /// Resolves a persisted target against currently available sources. Returns

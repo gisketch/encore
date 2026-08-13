@@ -3,6 +3,7 @@ mod diagnostics;
 mod pause;
 mod persistence;
 mod recovery;
+mod saving;
 
 use super::*;
 use crate::capture::{
@@ -147,6 +148,10 @@ fn service_with_rolling(
             settings: scratch_settings_store(),
             default_target: RwLock::new(PersistedTarget::Display),
             appearance: RwLock::new("system".into()),
+            save_destination: RwLock::new(None),
+            default_destination: std::env::temp_dir()
+                .join("encore-service-test-default-destination"),
+            after_save: RwLock::new("nothing".into()),
             diagnostics: DiagnosticLog::disabled(),
             user_paused: AtomicBool::new(false),
         })),
@@ -183,6 +188,9 @@ fn service_with_diagnostics(
         settings: scratch_settings_store(),
         default_target: RwLock::new(PersistedTarget::Display),
         appearance: RwLock::new("system".into()),
+        save_destination: RwLock::new(None),
+        default_destination: std::env::temp_dir().join("encore-service-test-default-destination"),
+        after_save: RwLock::new("nothing".into()),
         diagnostics,
         user_paused: AtomicBool::new(false),
     }))

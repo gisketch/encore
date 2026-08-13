@@ -1,3 +1,4 @@
+mod after_save;
 mod appearance;
 mod control;
 mod default_source;
@@ -7,6 +8,7 @@ mod pause;
 mod persistence;
 mod recovery;
 mod resize;
+mod save_destination;
 mod switch;
 #[cfg(test)]
 mod tests;
@@ -20,7 +22,7 @@ use super::{
     },
     permission::{PermissionProvider, SystemPermission},
     platform::NativeFrame,
-    settings::{PersistedTarget, SettingsStore},
+    settings::{PersistedTarget, SettingsSnapshot, SettingsStore},
     RuntimeSignal,
 };
 use crate::diagnostics::DiagnosticLog;
@@ -54,6 +56,14 @@ struct Inner {
     // choosing a default (Settings) both write here, last write wins.
     default_target: RwLock<PersistedTarget>,
     appearance: RwLock<String>,
+    // `None` means "use `default_destination`"; mirrors `default_target`'s
+    // pattern of an independently-persisted slice, but this one is also
+    // read by the replay pipeline at save time (see `resolved_save_destination`).
+    save_destination: RwLock<Option<PathBuf>>,
+    // The `Movies/Encore` fallback, resolved once at construction from the
+    // app's video directory so later reads never need an `AppHandle`.
+    default_destination: PathBuf,
+    after_save: RwLock<String>,
     diagnostics: DiagnosticLog,
     // Distinguishes an explicit user pause (stream torn down, must stay
     // paused) from the monitor's automatic blank/suspended pause, so queued
@@ -70,6 +80,11 @@ impl CaptureService {
         let initial_permission = permission.current();
         let settings = SettingsStore::new(settings_path);
         let document = settings.load();
+        let default_destination = app
+            .path()
+            .video_dir()
+            .unwrap_or_else(|_| std::env::temp_dir().join("encore"))
+            .join("Encore");
         let output_dir = app
             .path()
             .app_cache_dir()
@@ -107,6 +122,9 @@ impl CaptureService {
             settings,
             default_target: RwLock::new(document.target),
             appearance: RwLock::new(document.appearance),
+            save_destination: RwLock::new(document.save_destination),
+            default_destination,
+            after_save: RwLock::new(document.after_save),
             diagnostics,
             user_paused: AtomicBool::new(false),
         }));
@@ -136,6 +154,20 @@ impl CaptureService {
             .read()
             .unwrap_or_else(std::sync::PoisonError::into_inner)
             .clone()
+    }
+
+    /// The full Settings window snapshot: every independently-persisted
+    /// slice (appearance, default source, save destination, after-save)
+    /// plus the live retention minutes, assembled in one place so every
+    /// command that returns a snapshot stays in sync.
+    pub fn settings_snapshot(&self) -> SettingsSnapshot {
+        SettingsSnapshot {
+            appearance: self.appearance(),
+            retention_minutes: self.snapshot().retention.minutes,
+            default_target: self.default_target(),
+            save_destination: self.resolved_save_destination(),
+            after_save: self.after_save(),
+        }
     }
 
     pub(crate) fn rolling_store(&self) -> RollingStore {

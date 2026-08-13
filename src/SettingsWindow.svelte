@@ -3,6 +3,7 @@
   import type { Appearance } from "./appearance";
   import SettingsAppearanceControl from "./SettingsAppearanceControl.svelte";
   import SettingsRecordingSection from "./SettingsRecordingSection.svelte";
+  import SettingsSavingSection from "./SettingsSavingSection.svelte";
 
   let { appearance, onSetAppearance }: {
     appearance: Appearance;
@@ -36,6 +37,8 @@
 
     <div class="settings-body">
       <SettingsRecordingSection />
+
+      <SettingsSavingSection />
 
       <section class="settings-section" aria-labelledby="general-heading">
         <h2 id="general-heading" class="settings-section__title">General</h2>

@@ -33,6 +33,12 @@ pub(super) fn persist(service: &CaptureService) {
         .map(PersistedTarget::from_source)
         .unwrap_or_default();
     service.sync_default_target(target.clone());
-    let document = SettingsDocument::new(snapshot.retention.minutes, target, service.appearance());
+    let document = SettingsDocument::new(
+        snapshot.retention.minutes,
+        target,
+        service.appearance(),
+        service.save_destination(),
+        service.after_save(),
+    );
     let _ = service.0.settings.save(&document);
 }

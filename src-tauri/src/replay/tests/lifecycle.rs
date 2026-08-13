@@ -15,10 +15,10 @@ fn successful_export_releases_its_lease_before_a_later_trigger() {
     let service = ReplayService::with_test_parts(
         store.clone(),
         clock.clone(),
-        Arc::new(ReplayPackager::new(
-            destination.path().to_owned(),
-            Arc::new(ConfigurableRunner::new(Ok(()))),
-        )),
+        Arc::new(ReplayPackager::new(Arc::new(ConfigurableRunner::new(Ok(
+            (),
+        ))))),
+        destination::fixed(destination.path().to_owned()),
         Arc::new(|_| Ok(())),
     );
     let first_id = service.trigger_for_export().unwrap().replay_id.unwrap();
@@ -52,10 +52,8 @@ fn failed_export_preserves_the_lease_and_retry_releases_it() {
     let service = ReplayService::with_test_parts(
         store.clone(),
         Arc::new(TestClock::new(1_000)),
-        Arc::new(ReplayPackager::new(
-            destination.path().to_owned(),
-            runner.clone(),
-        )),
+        Arc::new(ReplayPackager::new(runner.clone())),
+        destination::fixed(destination.path().to_owned()),
         Arc::new(|_| Ok(())),
     );
     let first_id = service.trigger_for_export().unwrap().replay_id.unwrap();
@@ -91,10 +89,10 @@ fn internal_clock_failures_are_stable_and_preserve_pending_evidence() {
     let service = ReplayService::with_test_parts(
         store,
         clock.clone(),
-        Arc::new(ReplayPackager::new(
-            destination.path().to_owned(),
-            Arc::new(ConfigurableRunner::new(Err(RunnerFailure::Failed))),
-        )),
+        Arc::new(ReplayPackager::new(Arc::new(ConfigurableRunner::new(Err(
+            RunnerFailure::Failed,
+        ))))),
+        destination::fixed(destination.path().to_owned()),
         Arc::new(|_| Ok(())),
     );
     let first = service.trigger_for_export().unwrap().replay_id.unwrap();
@@ -118,10 +116,10 @@ fn finder_reveal_uses_an_opaque_saved_id_without_emitting_paths() {
     let service = ReplayService::with_test_parts(
         store,
         Arc::new(TestClock::new(1_000)),
-        Arc::new(ReplayPackager::new(
-            destination.path().to_owned(),
-            Arc::new(ConfigurableRunner::new(Ok(()))),
-        )),
+        Arc::new(ReplayPackager::new(Arc::new(ConfigurableRunner::new(Ok(
+            (),
+        ))))),
+        destination::fixed(destination.path().to_owned()),
         Arc::new(move |path| {
             revealed.send(path.to_owned()).unwrap();
             Ok(())
@@ -151,5 +149,69 @@ fn finder_reveal_uses_an_opaque_saved_id_without_emitting_paths() {
     assert_eq!(
         service.reveal_saved("caller-provided-path"),
         Err("export_reveal_failed".into())
+    );
+}
+
+/// The destination lookup is re-read for every export rather than fixed at
+/// construction: changing the shared value between two saves (mirroring
+/// what Settings does through `CaptureService::set_save_destination`) must
+/// land the second save in the new folder without touching the first.
+#[test]
+fn destination_lookup_is_read_fresh_for_every_export() {
+    let (_directory, store) = store_with_segments(&[(10_000, 16), (20_000, 16), (30_000, 16)]);
+    let first_destination = TestDirectory::new();
+    let second_destination = TestDirectory::new();
+    let current = destination::Swappable::new(first_destination.path().to_owned());
+    let service = ReplayService::with_test_parts(
+        store,
+        Arc::new(TestClock::new(1_000)),
+        Arc::new(ReplayPackager::new(Arc::new(ConfigurableRunner::new(Ok(
+            (),
+        ))))),
+        current.lookup(),
+        Arc::new(|_| Ok(())),
+    );
+
+    let first_id = service.trigger_for_export().unwrap().replay_id.unwrap();
+    let first_saved = service.run_export(&first_id);
+    assert_eq!(first_saved.state, ReplayState::Saved);
+    assert_eq!(fs::read_dir(first_destination.path()).unwrap().count(), 1);
+
+    current.set(second_destination.path().to_owned());
+    let second_id = service.trigger_for_export().unwrap().replay_id.unwrap();
+    let second_saved = service.run_export(&second_id);
+    assert_eq!(second_saved.state, ReplayState::Saved);
+    assert_eq!(fs::read_dir(first_destination.path()).unwrap().count(), 1);
+    assert_eq!(fs::read_dir(second_destination.path()).unwrap().count(), 1);
+}
+
+/// A destination that cannot be created at save time (here, a path nested
+/// under a plain file) fails the save through the same actionable error
+/// code the folder-picker validation uses, rather than failing silently or
+/// panicking.
+#[test]
+fn unusable_destination_fails_the_save_with_the_actionable_error_code() {
+    let (_directory, store) = store_with_segments(&[(10_000, 16)]);
+    let blocking_file = TestDirectory::new();
+    let not_a_directory = blocking_file.path().join("not-a-directory");
+    fs::write(&not_a_directory, b"not a directory").unwrap();
+    let unusable = not_a_directory.join("bundles");
+    let service = ReplayService::with_test_parts(
+        store,
+        Arc::new(TestClock::new(1_000)),
+        Arc::new(ReplayPackager::new(Arc::new(ConfigurableRunner::new(Ok(
+            (),
+        ))))),
+        destination::fixed(unusable),
+        Arc::new(|_| Ok(())),
+    );
+
+    let id = service.trigger_for_export().unwrap().replay_id.unwrap();
+    let result = service.run_export(&id);
+
+    assert_eq!(result.state, ReplayState::Failed);
+    assert_eq!(
+        result.error_code.as_deref(),
+        Some("export_destination_unavailable")
     );
 }
