@@ -370,3 +370,20 @@ lane before declaring the migration complete.
   against rapid toggles. Deliberate deferrals re-confirmed: Pause button →
   PG-03, Settings button → PG-04, retention control leaves the bar in
   PG-05.
+- 2026-08-13: PG-04 implemented. A hidden `settings` window (560x320,
+  decorations off, transparent, not always-on-top) is declared in
+  `tauri.conf.json` and shown/focused by `open_settings_window`; the
+  expanded bar's new Settings pill (ring glyph, between Pause and the
+  spacer) calls it. `SettingsDocument` gains a sanitized `appearance`
+  field (default `system`); `settings_snapshot`/`update_appearance`
+  read/write it through `CaptureService`'s single settings writer and
+  `update_appearance` broadcasts `settings-changed` via `app.emit` to every
+  window. One Vite entry now routes on `getCurrentWindow().label` (new
+  `AppRouter.svelte`): "settings" renders `SettingsWindow.svelte`, anything
+  else renders `CaptureShell`. Both windows fetch the snapshot at startup
+  and listen for `settings-changed`, applying it through
+  `appearance.ts#applyAppearance` (data-theme set/removed on
+  `document.documentElement`). Validation: cargo fmt/clippy/test (91 Rust
+  tests, 4 new covering round-trip, missing-field default, and
+  corrupt-value tolerance), svelte-check/build clean, SCC and sonata gates
+  pass.

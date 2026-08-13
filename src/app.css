@@ -362,6 +362,14 @@ select:focus-visible {
 
 .pause-control:disabled .pause-icon i { background: var(--icon-soft); }
 
+.settings-icon {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 auto;
+  border: 1.5px solid var(--icon-stroke);
+  border-radius: 50%;
+}
+
 .retention {
   height: 36px;
   padding: 3px;

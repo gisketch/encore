@@ -1,0 +1,123 @@
+/* Settings window (mockup 2a). Loaded alongside app.css; app.css owns the
+   floating bar's styles, this file owns the settings window's. */
+
+.settings-shell {
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  display: grid;
+}
+
+.settings-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 20px;
+  background-color: var(--surface);
+  background-image: var(--grain);
+  box-shadow: var(--shadow-bar);
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.settings-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px 10px;
+  cursor: grab;
+}
+
+.settings-titlebar:active { cursor: grabbing; }
+
+.settings-titlebar h1 {
+  flex: 1;
+  margin: 0;
+  color: var(--ink);
+  font-size: 12.5px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  text-align: center;
+}
+
+.traffic-lights,
+.traffic-lights-spacer {
+  display: flex;
+  flex: 0 0 auto;
+  width: 51px;
+  gap: 7px;
+}
+
+.traffic-dot {
+  width: 11px;
+  height: 11px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--hairline-strong);
+  cursor: default;
+}
+
+.traffic-dot--close {
+  cursor: pointer;
+  background: var(--attention);
+}
+
+.traffic-dot--minimize { background: var(--ink-faint); }
+
+.traffic-dot--zoom { background: var(--health); }
+
+.settings-body {
+  padding: 4px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.settings-section__title {
+  margin: 0 0 6px;
+  color: var(--ink-muted);
+  font: 600 10px/1 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--hairline-soft);
+}
+
+.settings-row__label {
+  color: var(--ink-secondary);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.appearance-control {
+  display: flex;
+  padding: 3px;
+  gap: 2px;
+  border: 1px solid var(--hairline);
+  border-radius: 16px;
+}
+
+.appearance-control button {
+  height: 26px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 12px;
+  color: var(--ink-muted);
+  background: transparent;
+  font: 600 10.5px/1 var(--font-mono);
+  cursor: pointer;
+}
+
+.appearance-control button.active {
+  color: var(--surface);
+  background: var(--ink);
+}

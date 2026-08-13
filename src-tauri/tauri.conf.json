@@ -29,6 +29,21 @@
         "alwaysOnTop": true,
         "skipTaskbar": true,
         "visibleOnAllWorkspaces": true
+      },
+      {
+        "label": "settings",
+        "title": "Settings",
+        "width": 560,
+        "height": 320,
+        "resizable": false,
+        "maximizable": false,
+        "minimizable": false,
+        "decorations": false,
+        "transparent": true,
+        "shadow": false,
+        "alwaysOnTop": false,
+        "center": true,
+        "visible": false
       }
     ],
     "security": {

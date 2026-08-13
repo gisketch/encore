@@ -1,13 +1,15 @@
 mod capture;
 mod desktop;
+mod diagnostics;
 mod encoder;
 mod packager;
 mod replay;
 mod retention;
 
-use capture::{CaptureService, CaptureSnapshot, CaptureSource, DiagnosticRecord};
+use capture::{CaptureService, CaptureSnapshot, CaptureSource, DiagnosticRecord, SettingsSnapshot};
+use diagnostics::DiagnosticLog;
 use replay::{ReplayService, ReplaySnapshot};
-use tauri::Manager;
+use tauri::{Emitter, Manager};
 
 #[tauri::command]
 fn capture_snapshot(service: tauri::State<'_, CaptureService>) -> CaptureSnapshot {
@@ -131,6 +133,30 @@ fn quit_encore(app: tauri::AppHandle) {
     app.exit(0);
 }
 
+#[tauri::command]
+fn open_settings_window(app: tauri::AppHandle) -> Result<(), String> {
+    desktop::open_settings_window(&app)
+}
+
+#[tauri::command]
+fn settings_snapshot(service: tauri::State<'_, CaptureService>) -> SettingsSnapshot {
+    SettingsSnapshot {
+        appearance: service.appearance(),
+    }
+}
+
+#[tauri::command]
+fn update_appearance(
+    app: tauri::AppHandle,
+    service: tauri::State<'_, CaptureService>,
+    appearance: String,
+) -> Result<SettingsSnapshot, String> {
+    let appearance = service.set_appearance(appearance)?;
+    let snapshot = SettingsSnapshot { appearance };
+    let _ = app.emit("settings-changed", snapshot.clone());
+    Ok(snapshot)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -142,15 +168,26 @@ pub fn run() {
                 .app_config_dir()
                 .map_err(std::io::Error::other)?
                 .join("settings.json");
-            let capture = CaptureService::new(app.handle().clone(), settings_path);
+            let diagnostics_path = app
+                .path()
+                .app_log_dir()
+                .map_err(std::io::Error::other)?
+                .join("diagnostics.jsonl");
+            let diagnostics = DiagnosticLog::open(diagnostics_path);
+            let capture =
+                CaptureService::new(app.handle().clone(), settings_path, diagnostics.clone());
             let replay_destination = app
                 .path()
                 .video_dir()
                 .map_err(std::io::Error::other)?
                 .join("Encore");
-            let replay =
-                ReplayService::new(capture.rolling_store(), capture.clone(), replay_destination)
-                    .map_err(std::io::Error::other)?;
+            let replay = ReplayService::new(
+                capture.rolling_store(),
+                capture.clone(),
+                replay_destination,
+                diagnostics,
+            )
+            .map_err(std::io::Error::other)?;
             app.manage(replay.clone());
             replay::register_global_shortcut(app.handle(), &replay);
             desktop::wire_capture_menu(app.handle(), &capture);
@@ -176,7 +213,10 @@ pub fn run() {
             reveal_saved_replay,
             open_screen_recording_settings,
             open_export_folder,
-            quit_encore
+            quit_encore,
+            open_settings_window,
+            settings_snapshot,
+            update_appearance
         ])
         .run(tauri::generate_context!())
         .expect("error while running Encore");

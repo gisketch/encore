@@ -251,6 +251,10 @@
   function openLibrary() {
     void invoke("open_export_folder").catch(showError);
   }
+
+  function openSettings() {
+    void invoke("open_settings_window").catch(showError);
+  }
 </script>
 
 <svelte:head><title>Encore</title></svelte:head>
@@ -320,6 +324,7 @@
         onSetRetention={setRetention}
         onPause={pauseCapture}
         onResume={resumeCapture}
+        onOpenSettings={openSettings}
         onQuit={() => invoke("quit_encore")}
       />
     {/if}

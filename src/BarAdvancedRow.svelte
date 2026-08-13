@@ -21,6 +21,7 @@
     onSetRetention,
     onPause,
     onResume,
+    onOpenSettings,
     onQuit,
   }: {
     sources: CaptureSource[];
@@ -35,6 +36,7 @@
     onSetRetention: (minutes: 5 | 10) => void;
     onPause: () => void;
     onResume: () => void;
+    onOpenSettings: () => void;
     onQuit: () => void;
   } = $props();
 
@@ -71,6 +73,11 @@
   <button class="pill-control pause-control" type="button" onclick={pauseAction} disabled={pauseDisabled} title="Pause or resume capture, keeping retained evidence">
     <span class="pause-icon" aria-hidden="true"><i></i><i></i></span>
     {pauseLabel}
+  </button>
+
+  <button class="pill-control settings-control" type="button" onclick={onOpenSettings} title="Open Settings">
+    <span class="settings-icon" aria-hidden="true"></span>
+    Settings
   </button>
 
   <span class="spacer" aria-hidden="true"></span>
