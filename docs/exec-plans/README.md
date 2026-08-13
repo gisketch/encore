@@ -4,7 +4,17 @@ Use checked-in plans for multi-step or high-risk work.
 
 ## Active Plans
 
-Create `active/` with the first plan. Use this name pattern:
+- [Replay trigger and snapshot](active/2026-08-12-replay-trigger.md) — RT-01 and
+  RT-02 approved for sequential xHigh implementation.
+- [macOS capture and permissions](active/2026-08-12-macos-capture.md) — all four
+  tickets implemented; permission-dependent hardware matrix remains to run.
+- [Always-on lifecycle](active/2026-08-13-always-on-lifecycle.md) — AL-01
+  through AL-04 drafted from the approved lifecycle spec.
+- [Paper & grain UI migration](active/2026-08-13-paper-grain-ui.md) — PG-01
+  through PG-15 implemented and reviewed (PG-09 start-at-login remains
+  deferred); manual macOS smokes of the new windows remain outstanding.
+
+Use this name pattern for new plans:
 
 ```text
 YYYY-MM-DD-short-slug.md
@@ -12,7 +22,14 @@ YYYY-MM-DD-short-slug.md
 
 ## Completed Plans
 
-Create `completed/` and move finished plans there after validation.
+- [Runnable shell](completed/2026-08-12-runnable-shell.md)
+- [macOS video pipeline](completed/2026-08-12-video-pipeline.md) — VP-01 through
+  VP-03 implemented; native hardware and live-capture media checks pass.
+- [Rolling buffer and crash recovery](completed/2026-08-12-rolling-buffer.md) —
+  RB-01 and RB-02 implemented; final Sonata review is clean.
+- [Local evidence bundle](completed/2026-08-12-local-evidence-bundle.md) — LEB-01
+  and LEB-02 implemented; live dev and packaged-app exports plus Finder reveal
+  pass final Sonata review.
 
 ## Required Sections
 
