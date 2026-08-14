@@ -116,4 +116,24 @@ and by double-click, then quit.
 
 ## Progress Log
 
-- 2026-08-14: Plan created; no tickets started.
+- 2026-08-14: Plan created.
+- 2026-08-14: MB-01 shipped. `menu_actions` lost its mode parameter and
+  always returns Save Replay, Pause/Resume, Open Library, Settings…, Show
+  Action Bar, Quit; only the pause item varies, and only with capture
+  state. Show Action Bar replaced both Show Floating Bar and the old
+  Show/Hide pair, and `show_action_bar` is the single restore path. Tests
+  assert no capture state can shrink the menu.
+- 2026-08-14: MB-02 shipped. The toggle, its command, its service slice,
+  and the persisted `menu_bar_mode` field are gone; `hide_window` went with
+  them, having lost its only caller. Removal is tolerant, with tests for
+  an old document loading intact and for a rewrite dropping the stale key.
+- 2026-08-14: MB-03 shipped, with a platform finding: macOS never emits
+  `TrayIconEvent::DoubleClick` (Windows-only in `tray-icon` 0.24), so the
+  gesture is timed in Encore from the left `Click`/`Down` edge, which
+  macOS does deliver before the menu opens. 500ms threshold, five unit
+  tests over the pure predicate. **Needs a real macOS run** to confirm the
+  second press is not swallowed by the menu that the first press opened;
+  the menu item remains the guaranteed restore path either way.
+- 2026-08-14: Outstanding for this plan — the end-to-end macOS smoke:
+  launch, close the bar, drive every action from the menu bar, restore by
+  menu item and by double-click, then quit.

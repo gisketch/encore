@@ -111,15 +111,25 @@ a mode; both are always available in the same way.
   menu bar; "Show Action Bar" restores it; double-click restores it; Quit
   ends the process.
 
-## Risks and Open Questions
+## Resolved: click handling (2026-08-14)
 
-- **Open question — click handling.** macOS shows an attached tray menu on
-  the first click, which can swallow the second click of a double-click. If
-  showing the menu on left-click and detecting a double-click prove mutually
-  exclusive on this Tauri version, the fallback is: menu on right-click and
-  on single left-click as today, with double-click best-effort; the menu's
-  "Show Action Bar" item remains the guaranteed path either way. Resolve by
-  manual smoke, and record what actually works.
+The open question is answered by the dependency, not by preference.
+`TrayIconEvent::DoubleClick` exists in Tauri's enum but **the macOS backend
+never emits it** — `tray-icon`'s macOS implementation sends only `Click`,
+`Enter`, `Leave`, and `Move`; double-click is Windows-only. It does send the
+left `Click`/`Down` before opening the attached menu, so the gesture is
+recovered by timing two presses in Encore itself (500ms, matching the macOS
+double-click interval).
+
+The menu therefore stays on left-click, where it is discoverable, and
+double-click is layered on top. Because the first click opens the menu, the
+second press may be consumed by the open menu before it reaches Encore —
+this is the one behavior that needs a real macOS run to confirm. The menu's
+"Show Action Bar" item is the guaranteed path regardless, and if the
+gesture proves unreachable the fallback stands: move the menu to
+right-click only, freeing left-click entirely.
+
+## Risks and Open Questions
 - A tester who closes the bar and does not know about the menu bar icon
   could believe Encore stopped. The menu bar icon and the confirmation
   chime are the mitigations; a first-close hint is possible future work.

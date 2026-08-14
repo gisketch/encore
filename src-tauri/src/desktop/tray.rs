@@ -120,7 +120,8 @@ pub(crate) fn build(app: &mut tauri::App) -> tauri::Result<()> {
         .menu(&menu)
         .tooltip("Encore — local replay")
         .show_menu_on_left_click(true)
-        .on_menu_event(handle_menu_event);
+        .on_menu_event(handle_menu_event)
+        .on_tray_icon_event(super::tray_click::handle);
     if let Some(icon) = app.default_window_icon() {
         tray = tray.icon(icon.clone());
     }
