@@ -1,6 +1,10 @@
 # Post-Save Preview Plan
 
-Status: **READY** — spec approved (self-grilled 2026-08-14), tickets below.
+Status: **IMPLEMENTED** — PP-01 through PP-05 complete (2026-08-14); every
+ticket in this plan has landed. What remains is the plan's milestone check:
+the spec's full macOS smoke (hotkey while unfocused → sound → preview →
+each action → auto-dismiss), plus the light/dark and reduced-motion visual
+checks, none of which can run headless.
 
 ## Goal
 
@@ -159,6 +163,9 @@ during preview. Behavior lane.
 PP-01 → PP-02 → PP-04, PP-05
 PP-01 → PP-03 (parallel with PP-02)
 
+All five landed in that order (PP-01, PP-02, PP-03, PP-04, PP-05); nothing
+in the chain is outstanding.
+
 ## Validation Lane
 
 Behavior lane per ticket. The spec's full macOS smoke (hotkey while
@@ -299,3 +306,53 @@ milestone check for this plan.
   `check-quality-gates.mjs`, `check-sonata.sh` — all green. Not yet
   covered: the macOS smoke exercising all three buttons against one known
   replay.
+- 2026-08-14: PP-05 complete; this plan is now fully implemented. **The
+  asset-protocol grant was missing.** `editor::open` grants it
+  (`asset_protocol_scope().allow_directory(destination, true)`) but
+  PP-02's `preview::show` did not, and `security.assetProtocol.scope` in
+  `tauri.conf.json` is empty, so the card's `<video>` would have loaded
+  only by accident — after the Editor had been opened at least once this
+  session, and never on a fresh launch. `preview::show` now makes the same
+  grant (before `show`, failing as `preview_scope_failed`); it is
+  process-wide and idempotent, so this widens nothing beyond the resolved
+  save destination the Editor already grants. No capability change: the
+  asset protocol is gated by config plus that runtime scope, not by a
+  window permission, so `capabilities/preview.json` still grants only
+  `core:default` + `core:window:allow-hide`. The media area moved into a
+  new `PreviewMedia.svelte` holding the whole fallback chain — video →
+  `library_thumbnail` still → striped placeholder — so the box is never
+  blank: the `<video>`'s `onerror` flips to the still (reset per payload,
+  since the row never remounts), and the still's own failure already fell
+  through to the placeholder. Auto-dismiss timing lives in a pure
+  `previewDismiss.ts`: `advanced(elapsedMs, hovered, tickMs)` is a
+  `Record` lookup, not a branch — a hovered tick is simply worth zero, so
+  hover can only postpone a dismissal, never cancel one already fired or
+  rewind counted time — and `shouldDismiss(elapsedMs)` compares against
+  `DISMISS_AFTER_MS = 8000`. **No JavaScript test runner exists in this
+  repository** (`package.json` has no vitest/jest and the ticket forbids
+  adding one), and the rule is webview timing that would not be honest to
+  relocate into Rust, so the spec's "timing-model unit test" is *not*
+  covered by an automated test. The mitigation is that the module is
+  branch-free, total, has no time source of its own, and carries its
+  worked example table in its header; adding vitest and a dozen-line spec
+  is the obvious follow-up. The interval and the one dismissal branch sit
+  in a render-less `PreviewCountdown.svelte`, restarted whenever the
+  payload swaps or the card is shown again (so a re-shown preview never
+  inherits a nearly expired clock) and not ticking at all while dismissed.
+  Hover is a `pointerenter`/`pointerleave` pair on the card surface, which
+  covers the action buttons too, so no click can be overtaken mid-press.
+  Playback stops by construction: `showing` gates the `<video>`'s
+  existence, so dismissing (or swapping payloads) unmounts it and the
+  effect cleanup pauses it, removes `src`, and calls `load()` — no decode
+  behind a hidden window. Under `prefers-reduced-motion: reduce` the video
+  is never rendered and the still shows instead, while the countdown keeps
+  working. `PreviewWindow.svelte` stays at its tracked SCC complexity of 2
+  (it lost the `{#if thumbnailUrl}` block and gained only imports,
+  branch-free state, and two child tags); the new files measure 4
+  (`PreviewMedia`), 2 (`PreviewCountdown`), and 0 (`previewDismiss.ts`),
+  and `preview.css` stays at 0. Validation: `npm run check`,
+  `npm run build`, `cargo fmt --check`, `cargo clippy -D warnings`,
+  `cargo test` (215 pass, 8 ignored), `check-quality-gates.mjs`,
+  `check-sonata.sh` — all green. Not yet covered: the macOS smoke on a
+  real 10-minute replay watching CPU during preview, the reduced-motion
+  check, and this plan's end-to-end milestone smoke.

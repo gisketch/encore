@@ -6,10 +6,17 @@
   import { formatCardSubline } from "./libraryFormat";
   import { fetchThumbnailDataUrl } from "./libraryThumbnail";
   import PreviewActions from "./PreviewActions.svelte";
+  import PreviewCountdown from "./PreviewCountdown.svelte";
+  import PreviewMedia from "./PreviewMedia.svelte";
   import type { PreviewPayload } from "./previewTypes";
 
   let payload = $state<PreviewPayload | null>(null);
   let thumbnailUrl = $state<string | null>(null);
+  // `showing` is what the media area and the auto-dismiss clock follow:
+  // the window itself is hidden rather than closed, so this is the only
+  // signal that playback must stop and the countdown must stand down.
+  let showing = $state(false);
+  let hovered = $state(false);
 
   // The window is shown without focus and reused for every save, so it
   // never remounts: the bootstrap read covers the first save that raised
@@ -32,6 +39,8 @@
   function show(next: PreviewPayload | null) {
     payload = next;
     thumbnailUrl = null;
+    showing = Boolean(next);
+    hovered = false;
     if (!next) return;
     void fetchThumbnailDataUrl(next.id).then((url) => {
       thumbnailUrl = url;
@@ -40,7 +49,10 @@
 
   // Dismiss hides rather than closes: the same window is raised again by
   // the next save, with its contents swapped. Nothing else is torn down.
+  // Dropping `showing` first unmounts the video, which pauses and releases
+  // it, so nothing keeps decoding behind the hidden window.
   function dismiss() {
+    showing = false;
     void getCurrentWindow().hide();
   }
 
@@ -55,7 +67,15 @@
 <svelte:window onkeydown={handleKey} />
 
 <main class="preview-shell">
-  <section class="preview-card-surface">
+  <!-- Hovering anywhere on the card — including its buttons — freezes the
+       auto-dismiss countdown, so no interaction is overtaken mid-click. -->
+  <section
+    class="preview-card-surface"
+    role="group"
+    aria-label="Saved replay preview"
+    onpointerenter={() => (hovered = true)}
+    onpointerleave={() => (hovered = false)}
+  >
     <button
       type="button"
       class="preview-dismiss"
@@ -65,11 +85,7 @@
     ></button>
 
     <div class="preview-still">
-      {#if thumbnailUrl}
-        <img class="preview-still__image" src={thumbnailUrl} alt="" />
-      {:else}
-        <span class="preview-still__label">Screen frame</span>
-      {/if}
+      <PreviewMedia {payload} {thumbnailUrl} active={showing} />
     </div>
 
     <div class="preview-meta">
@@ -80,5 +96,6 @@
     </div>
 
     <PreviewActions {payload} onDismiss={dismiss} />
+    <PreviewCountdown {payload} {hovered} active={showing} onElapsed={dismiss} />
   </section>
 </main>

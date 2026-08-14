@@ -14,7 +14,8 @@ Use checked-in plans for multi-step or high-risk work.
   through PG-15 implemented and reviewed (PG-09 start-at-login remains
   deferred); manual macOS smokes of the new windows remain outstanding.
 - [Post-save preview](active/2026-08-14-post-save-preview.md) — PP-01 through
-  PP-05 drafted from the approved spec; starts with PP-01.
+  PP-05 implemented and reviewed; the end-to-end macOS smoke and a JS test
+  runner for the auto-dismiss timing rule remain outstanding.
 
 Use this name pattern for new plans:
 

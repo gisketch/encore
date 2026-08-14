@@ -133,6 +133,17 @@ gets out of the way on its own.
 - A rapid double-save check confirming a single preview window survives.
 - Light and dark visual check plus a reduced-motion check.
 
+## Known Gaps After Implementation (2026-08-14)
+
+- The auto-dismiss timing rule has **no automated test**: the repository has
+  no JavaScript test runner, and the rule is webview timing that would be
+  dishonest to relocate into Rust. It is implemented as a branch-free pure
+  module with a worked example table. Adding a JS test runner and a short
+  spec for it is the obvious follow-up.
+- The end-to-end macOS smoke (hotkey while unfocused → chime → preview →
+  each action → auto-dismiss), the reduced-motion check, and a CPU
+  observation while a 10-minute replay loops are all still outstanding.
+
 ## Risks and Open Questions
 
 - **Open question — Share behavior.** Clipboard copy in v1; a native macOS

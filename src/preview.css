@@ -81,6 +81,18 @@
   object-fit: cover;
 }
 
+/* The looping video sits in the same box as the still it falls back to,
+   at picture-in-picture size — the card is 320pt wide, so the decode this
+   asks for stays small even for a 1080p replay. */
+.preview-still__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: transparent;
+}
+
 .preview-still__label {
   color: var(--ink-faint);
   font: 600 9px/1 var(--font-mono);

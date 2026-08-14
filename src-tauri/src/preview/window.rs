@@ -38,11 +38,21 @@ const BAR_HEIGHT_POINTS: f64 = 84.0;
 /// The event carries the payload so an already-visible preview swaps its
 /// contents in place; a second save therefore reuses this one window
 /// instead of opening another.
+///
+/// The asset protocol is granted `destination` exactly as `editor::open`
+/// grants it, and for the same reason: the card's `<video>` loads the
+/// replay file through `convertFileSrc`, which is refused without it — the
+/// video would silently never load. The scope is process-wide (Tauri has
+/// no per-window scope), so this only ever grants the resolved save
+/// destination tree, and re-granting it on every save is a no-op.
 pub(crate) fn show(app: &AppHandle, destination: &Path, id: &str) -> Result<(), String> {
     let payload = super::build(destination, id)?;
     let window = app
         .get_webview_window(LABEL)
         .ok_or_else(|| "preview_window_unavailable".to_string())?;
+    app.asset_protocol_scope()
+        .allow_directory(destination, true)
+        .map_err(|_| "preview_scope_failed".to_string())?;
     if let Some(context) = app.try_state::<PreviewContext>() {
         set(context.inner(), Some(payload.clone()));
     }
