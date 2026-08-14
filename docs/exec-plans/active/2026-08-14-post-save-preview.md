@@ -197,3 +197,35 @@ milestone check for this plan.
   the 350-line ceiling. Validation: `npm run check`, `npm run build`,
   `cargo fmt --check`, `cargo clippy -D warnings`, `cargo test` (200 pass, 8 ignored),
   `check-quality-gates.mjs`, `check-sonata.sh` — all green.
+- 2026-08-14: PP-02 complete. New `preview` window in `tauri.conf.json`
+  (320×250, undecorated, transparent, always-on-top, `skipTaskbar`,
+  `visibleOnAllWorkspaces`, `visible: false`, and `focus: false` — the v2
+  key for "do not focus on creation"), with its own
+  `capabilities/preview.json` granting only `core:default` and
+  `core:window:allow-hide`: it is positioned from Rust, so it needs no
+  window-positioning permission, and it is deliberately given nothing that
+  could take focus. `preview::window` adds a `PreviewContext`
+  (`Mutex<Option<PreviewPayload>>`, mirroring `EditorContext`) plus
+  `show`, which builds the payload first (a replay that cannot be
+  described never reaches the screen), records it, positions the window,
+  `show`s it without ever calling `set_focus`, and emits `preview-changed`
+  so a second save swaps this one window's contents instead of opening
+  another. Placement lives in a pure `preview::placement` so the rule is
+  testable without an `AppHandle`: bottom-right of the monitor work area
+  with the bar's 16pt margin, lifted clear of a reserved bottom band (the
+  measured floating-bar height plus its margin) — a test on a 1024pt-wide
+  work area shows the centered 760pt bar reaches into that corner, so
+  horizontal separation alone would not hold. The `AfterSaveAction::Preview`
+  arm now calls it with `saved.display_name` (the on-disk id), never
+  `saved.id`. `preview_context` is the window's bootstrap read.
+  `PreviewWindow.svelte` (routed by label through `AppRouter`'s nested
+  `{:else}`) renders a paper card with the `library_thumbnail` still (the
+  striped placeholder on any failure), the display name, and a mono
+  "duration · size" line via the Library's own `formatCardSubline`;
+  Escape and the close dot both hide the window so it can be reused.
+  Edit/Share/Open Folder stay for PP-04; the card leaves their row space.
+  Validation: `npm run check`, `npm run build`, `cargo fmt --check`,
+  `cargo clippy -D warnings`, `cargo test` (207 pass, 8 ignored),
+  `check-quality-gates.mjs`, `check-sonata.sh` — all green. Not yet
+  covered: the macOS hotkey-while-unfocused smoke and the light/dark
+  visual check.

@@ -7,6 +7,7 @@
   import CaptureShell from "./CaptureShell.svelte";
   import EditorWindow from "./EditorWindow.svelte";
   import LibraryWindow from "./LibraryWindow.svelte";
+  import PreviewWindow from "./PreviewWindow.svelte";
   import SettingsWindow from "./SettingsWindow.svelte";
 
   const native = isTauri();
@@ -42,7 +43,11 @@
     {#if label === "editor"}
       <EditorWindow />
     {:else}
-      <CaptureShell />
+      {#if label === "preview"}
+        <PreviewWindow />
+      {:else}
+        <CaptureShell />
+      {/if}
     {/if}
   {/if}
 {/if}

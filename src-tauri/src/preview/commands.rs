@@ -2,7 +2,7 @@
 //! (already at the harness's 350-line file-size ceiling) following the
 //! `editor::commands` precedent.
 
-use super::PreviewPayload;
+use super::{PreviewContext, PreviewPayload};
 use crate::capture::CaptureService;
 
 /// Everything the preview needs about saved replay `id`: display name,
@@ -17,4 +17,14 @@ pub(crate) fn preview_payload(
     id: String,
 ) -> Result<PreviewPayload, String> {
     super::build(&service.resolved_save_destination(), &id)
+}
+
+/// The preview window's own bootstrap read, mirroring `editor_context`:
+/// the payload the after-save dispatch most recently put on screen, or
+/// `None` when the hidden window boots before any replay has been saved.
+/// After mount the window follows the `preview-changed` event instead, so
+/// a second save swaps this one window's contents.
+#[tauri::command]
+pub(crate) fn preview_context(context: tauri::State<'_, PreviewContext>) -> Option<PreviewPayload> {
+    super::current(context.inner())
 }

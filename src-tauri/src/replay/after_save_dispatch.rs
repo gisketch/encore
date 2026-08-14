@@ -24,11 +24,19 @@ pub(super) fn apply(
         }
         // `saved.display_name`, not `saved.id`: see `open_in_editor`.
         AfterSaveAction::OpenEditor => open_in_editor(app, capture, &saved.display_name),
-        // PP-01 routes the choice only; PP-02 attaches the preview window
-        // here, reading `preview::payload` for the just-saved `saved.id`.
-        AfterSaveAction::Preview => {}
+        // `saved.display_name` again, for the reason `open_in_editor`
+        // spells out: the preview addresses the bundle on disk.
+        AfterSaveAction::Preview => show_preview(app, capture, &saved.display_name),
         AfterSaveAction::Nothing => {}
     }
+}
+
+/// Raises the corner preview for the just-saved replay. Like
+/// `open_in_editor`, every failure is swallowed: the save has already
+/// succeeded and its recorded state must not depend on whether a preview
+/// could be built or shown.
+fn show_preview(app: &AppHandle, capture: &CaptureService, bundle_id: &str) {
+    let _ = crate::preview::show(app, &capture.resolved_save_destination(), bundle_id);
 }
 
 /// Opens the just-saved replay in the Editor window: validates `bundle_id`

@@ -41,9 +41,13 @@ gets out of the way on its own.
     confirmation and keeps the preview open.
   - *Open Folder* — reveals the saved bundle in Finder and dismisses.
 - **Auto-dismiss** after about 8 seconds, with the countdown paused while the
-  pointer is over the preview; Escape and the close affordance dismiss
-  immediately. A second save while a preview is showing replaces its contents
-  and restarts the countdown rather than opening a second window.
+  pointer is over the preview; the close affordance dismisses immediately,
+  and Escape dismisses once the preview has been clicked. (It deliberately
+  never takes focus on appearance, so it receives no key events until the
+  user interacts with it — the close control and auto-dismiss are the
+  guaranteed paths out.) A second save while a preview is showing replaces
+  its contents and restarts the countdown rather than opening a second
+  window.
 - **Settings**: the after-save choice gains a `preview` option, which becomes
   the new default; a separate "Play a sound when a replay is saved" toggle
   lives in the Saving section.

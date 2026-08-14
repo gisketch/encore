@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "preview",
+  "description": "Post-save preview window: read defaults plus hide, which is how it dismisses (the window is reused for the next save). Deliberately no focus, positioning, or dragging permissions — it is placed from Rust and must never take keyboard focus from the application under test.",
+  "windows": ["preview"],
+  "permissions": ["core:default", "core:window:allow-hide"]
+}

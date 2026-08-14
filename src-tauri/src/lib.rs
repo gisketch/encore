@@ -19,7 +19,7 @@ use editor::export::commands::{export_gif_replay, export_trimmed_replay};
 use library::commands::{
     delete_replay, library_index, library_thumbnail, open_library_window, open_replay_file,
 };
-use preview::commands::preview_payload;
+use preview::commands::{preview_context, preview_payload};
 use replay::{ReplayService, ReplaySnapshot};
 use tauri::{Emitter, Manager};
 
@@ -257,6 +257,7 @@ pub fn run() {
             desktop::wire_capture_menu(app.handle(), &capture);
             app.manage(capture);
             app.manage(editor::EditorContext::new(None));
+            app.manage(preview::PreviewContext::new(None));
             Ok(())
         })
         .on_window_event(desktop::handle_window_event)
@@ -286,6 +287,7 @@ pub fn run() {
             delete_replay,
             library_thumbnail,
             preview_payload,
+            preview_context,
             open_editor_window,
             editor_context,
             editor_header,
