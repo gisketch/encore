@@ -82,6 +82,8 @@
         "title": "Editor",
         "width": 1060,
         "height": 640,
+        "minWidth": 900,
+        "minHeight": 600,
         "resizable": true,
         "maximizable": false,
         "minimizable": false,

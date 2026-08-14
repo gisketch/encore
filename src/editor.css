@@ -119,8 +119,14 @@
 
 .editor-preview {
   position: relative;
-  flex: 0 0 auto;
-  aspect-ratio: 16 / 9;
+  /* Takes the height left over after the readout, timeline, toolbar, and
+     export bar rather than dictating it from a 16/9 ratio: at this
+     window's width that ratio demanded more height than the window has,
+     which pushed the timeline below the fold and forced a scroll. The
+     video itself is `object-fit: contain`, so it letterboxes into
+     whatever shape this ends up being. */
+  flex: 1 1 auto;
+  min-height: 140px;
   display: flex;
   align-items: center;
   justify-content: center;
