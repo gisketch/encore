@@ -14,7 +14,9 @@ Use checked-in plans for multi-step or high-risk work.
   through PG-15 implemented and reviewed (PG-09 start-at-login remains
   deferred); manual macOS smokes of the new windows remain outstanding.
 - [Menu bar control surface](active/2026-08-14-menu-bar-control-surface.md) —
-  MB-01 through MB-03 drafted from the approved spec; starts with MB-01.
+  MB-01 through MB-03 implemented; the end-to-end macOS smoke, including
+  whether the double-click gesture survives the menu opening, is
+  outstanding.
 - [Post-save preview](active/2026-08-14-post-save-preview.md) — PP-01 through
   PP-05 implemented and reviewed; the end-to-end macOS smoke and a JS test
   runner for the auto-dismiss timing rule remain outstanding.
