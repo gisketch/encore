@@ -40,6 +40,7 @@ always-on lifecycle spec; grill them together so answers stay consistent.
 | Spec | Outcome | Status |
 |---|---|---|
 | [Post-save replay preview](2026-08-14-post-save-preview.md) | Sound plus a corner picture-in-picture preview with Edit, Share, and Open Folder after a save | APPROVED |
+| [Menu bar as the primary control surface](2026-08-14-menu-bar-control-surface.md) | Bar shown at launch and hidden by closing it; the menu bar always carries every action | APPROVED |
 
 System audio remains a future milestone. It should receive its own capture and
 A/V synchronization spec after the video-only MVP is proven.
