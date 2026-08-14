@@ -16,6 +16,7 @@ fn hotkeys_round_trip_through_atomic_write() {
             open_library: "Ctrl+Alt+L".into(),
         },
         false,
+        true,
     );
 
     store.save(&document).unwrap();

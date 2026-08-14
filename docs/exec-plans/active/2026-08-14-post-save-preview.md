@@ -229,3 +229,33 @@ milestone check for this plan.
   `check-quality-gates.mjs`, `check-sonata.sh` — all green. Not yet
   covered: the macOS hotkey-while-unfocused smoke and the light/dark
   visual check.
+- 2026-08-14: PP-03 complete. The chime plays from Rust, not a webview: a
+  new `sound` module spawns `afplay <resource>` on a detached thread from
+  `after_save_dispatch::apply`, deliberately *outside* the choice `match`,
+  so it is heard with every Encore window hidden (menu-bar mode) or
+  unfocused, is independent of the after-save choice (`nothing` still
+  chimes), and never delays the save. It is reached only through
+  `honor_after_save`'s `saved`-state guard, so a failed save stays silent
+  by construction, and every failure inside it is swallowed. The asset is
+  ours — `src-tauri/resources/save-chime.wav`, a 26.5 KB 0.3s two-tone
+  chime (A5 → E6, 44.1 kHz mono 16-bit) generated deterministically by
+  `scripts/generate-save-chime.mjs`; no `/System/Library` sound is
+  depended on. It ships through `tauri.conf.json`'s `bundle.resources` and
+  resolves via `BaseDirectory::Resource`, which answers in both worlds:
+  bundled it is `Contents/Resources/resources/save-chime.wav`, and in dev
+  `tauri-build` stages the same relative path next to the debug binary
+  (verified: `src-tauri/target/debug/resources/save-chime.wav`), with the
+  source tree kept as a debug-only last-resort fallback. `save_sound: bool`
+  persists with the versioned/corrupt-tolerant pattern; because its default
+  is *true* it carries its own `#[serde(default = "default_save_sound")]`
+  rather than `#[serde(default)]`, so pre-PP-03 files and corrupt files
+  land on the sound being on — covered by tests for the missing field, the
+  corrupt file, an off round-trip, and a setter round-trip that preserves
+  other persisted fields. `update_save_sound` broadcasts `settings-changed`
+  like its siblings. Settings → Saving gains the toggle through a new
+  self-contained `SettingsSaveSoundRow.svelte` (existing `.switch` markup),
+  which keeps the tracked `SettingsSavingSection.svelte` at an unchanged
+  complexity. Validation: `npm run check`, `npm run build`,
+  `cargo fmt --check`, `cargo clippy -D warnings`, `cargo test` (213 pass,
+  8 ignored), `check-quality-gates.mjs`, `check-sonata.sh` — all green.
+  Not yet covered: the manual save-with-sound / toggle-off macOS smokes.

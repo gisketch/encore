@@ -12,6 +12,7 @@ mod persistence;
 mod recovery;
 mod resize;
 mod save_destination;
+mod save_sound;
 mod switch;
 #[cfg(test)]
 mod tests;
@@ -72,6 +73,9 @@ struct Inner {
     // mirrors `appearance`'s independently-persisted-slice pattern since the
     // desktop shell (not just capture) reads and toggles it.
     menu_bar_mode: RwLock<bool>,
+    // Whether a successful save plays the confirmation chime; read by the
+    // replay after-save dispatch, independently of the after-save choice.
+    save_sound: RwLock<bool>,
     diagnostics: DiagnosticLog,
     // Distinguishes an explicit user pause (stream torn down, must stay
     // paused) from the monitor's automatic blank/suspended pause, so queued
@@ -135,6 +139,7 @@ impl CaptureService {
             after_save: RwLock::new(document.after_save),
             hotkeys: RwLock::new(document.hotkeys),
             menu_bar_mode: RwLock::new(document.menu_bar_mode),
+            save_sound: RwLock::new(document.save_sound),
             diagnostics,
             user_paused: AtomicBool::new(false),
         }));
@@ -179,6 +184,7 @@ impl CaptureService {
             after_save: self.after_save(),
             hotkeys: self.hotkeys(),
             menu_bar_mode: self.menu_bar_mode(),
+            save_sound: self.save_sound(),
         }
     }
 

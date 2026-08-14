@@ -6,6 +6,7 @@
   import { onMount } from "svelte";
   import type { AfterSave, SettingsSnapshot } from "./appearance";
   import { abbreviateHome } from "./savingSettings";
+  import SettingsSaveSoundRow from "./SettingsSaveSoundRow.svelte";
 
   const AFTER_SAVE_OPTIONS: { value: AfterSave; label: string }[] = [
     { value: "preview", label: "Show preview" },
@@ -105,4 +106,6 @@
       {/each}
     </div>
   </div>
+
+  <SettingsSaveSoundRow />
 </section>

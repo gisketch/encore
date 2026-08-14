@@ -9,6 +9,7 @@ mod packager;
 mod preview;
 mod replay;
 mod retention;
+mod sound;
 
 use capture::{CaptureService, CaptureSnapshot, CaptureSource, DiagnosticRecord, SettingsSnapshot};
 use diagnostics::DiagnosticLog;
@@ -213,6 +214,17 @@ fn update_menu_bar_mode(app: tauri::AppHandle, enabled: bool) -> Result<Settings
     desktop::set_menu_bar_mode(&app, enabled)
 }
 
+/// Applies, persists, and broadcasts the save-confirmation-sound toggle.
+#[tauri::command]
+fn update_save_sound(
+    app: tauri::AppHandle,
+    service: tauri::State<'_, CaptureService>,
+    enabled: bool,
+) -> Result<SettingsSnapshot, String> {
+    service.set_save_sound(enabled)?;
+    Ok(broadcast_settings(&app, service.inner()))
+}
+
 /// Reads the current settings snapshot and broadcasts it to every window,
 /// so commands that change a single field don't each have to remember to.
 fn broadcast_settings(app: &tauri::AppHandle, service: &CaptureService) -> SettingsSnapshot {
@@ -301,7 +313,8 @@ pub fn run() {
             update_save_destination,
             update_after_save,
             update_hotkey,
-            update_menu_bar_mode
+            update_menu_bar_mode,
+            update_save_sound
         ])
         .run(tauri::generate_context!())
         .expect("error while running Encore");

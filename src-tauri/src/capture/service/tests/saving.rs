@@ -43,6 +43,7 @@ fn service_with_default_destination(default_destination: PathBuf) -> CaptureServ
         after_save: RwLock::new("nothing".into()),
         hotkeys: RwLock::new(Hotkeys::default()),
         menu_bar_mode: RwLock::new(false),
+        save_sound: RwLock::new(true),
         diagnostics: DiagnosticLog::disabled(),
         user_paused: AtomicBool::new(false),
     }))
@@ -147,6 +148,32 @@ fn after_save_accepts_preview_and_round_trips_through_the_setter() {
     assert_eq!(snapshot.after_save, "preview");
     assert_eq!(service.after_save(), "preview");
     assert_eq!(service.0.settings.load().after_save, "preview");
+}
+
+#[test]
+fn save_sound_defaults_to_on_and_round_trips_through_the_setter() {
+    let service = service_with_default_destination(scratch_default_destination());
+    assert!(service.save_sound());
+
+    let snapshot = service.set_save_sound(false).unwrap();
+
+    assert!(!snapshot.save_sound);
+    assert!(!service.save_sound());
+    assert!(!service.0.settings.load().save_sound);
+}
+
+#[test]
+fn save_sound_update_preserves_other_persisted_fields() {
+    let service = service_with_default_destination(scratch_default_destination());
+    service.set_retention_minutes(5).unwrap();
+    service.set_after_save("reveal".into()).unwrap();
+
+    service.set_save_sound(false).unwrap();
+
+    let reloaded = service.0.settings.load();
+    assert_eq!(reloaded.retention_minutes, 5);
+    assert_eq!(reloaded.after_save, "reveal");
+    assert!(!reloaded.save_sound);
 }
 
 #[test]

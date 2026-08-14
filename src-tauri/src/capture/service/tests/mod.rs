@@ -154,6 +154,7 @@ fn service_with_rolling(
             after_save: RwLock::new("nothing".into()),
             hotkeys: RwLock::new(Hotkeys::default()),
             menu_bar_mode: RwLock::new(false),
+            save_sound: RwLock::new(true),
             diagnostics: DiagnosticLog::disabled(),
             user_paused: AtomicBool::new(false),
         })),
@@ -195,6 +196,7 @@ fn service_with_diagnostics(
         after_save: RwLock::new("nothing".into()),
         hotkeys: RwLock::new(Hotkeys::default()),
         menu_bar_mode: RwLock::new(false),
+        save_sound: RwLock::new(true),
         diagnostics,
         user_paused: AtomicBool::new(false),
     }))

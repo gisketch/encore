@@ -51,6 +51,7 @@ impl CaptureService {
             self.after_save(),
             self.hotkeys(),
             self.menu_bar_mode(),
+            self.save_sound(),
         );
         let _ = self.0.settings.save(&document);
     }

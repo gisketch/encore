@@ -12,6 +12,7 @@ fn save_destination_and_after_save_round_trip_through_atomic_write() {
         "reveal".into(),
         Hotkeys::default(),
         false,
+        true,
     );
 
     store.save(&document).unwrap();
@@ -65,6 +66,7 @@ fn preview_after_save_round_trips_through_atomic_write() {
         "preview".into(),
         Hotkeys::default(),
         false,
+        true,
     );
 
     store.save(&document).unwrap();
@@ -100,6 +102,7 @@ fn open_editor_after_save_round_trips_through_atomic_write() {
         "open_editor".into(),
         Hotkeys::default(),
         false,
+        true,
     );
 
     store.save(&document).unwrap();

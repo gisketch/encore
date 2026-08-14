@@ -18,6 +18,10 @@ pub(super) fn apply(
     capture: &CaptureService,
     saved: &SavedReplaySnapshot,
 ) {
+    // Deliberately outside the match: the confirmation sound is its own
+    // setting, so `after_save = nothing` still gets it. Reached only for a
+    // save that succeeded, so failures stay silent.
+    crate::sound::play_saved_chime(app, capture.save_sound());
     match action_for(&capture.after_save()) {
         AfterSaveAction::Reveal => {
             let _ = reveal_and_emit(app, service, &saved.id);

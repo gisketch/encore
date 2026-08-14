@@ -26,6 +26,7 @@ fn menu_bar_mode_round_trips_through_atomic_write() {
         "nothing".into(),
         Hotkeys::default(),
         true,
+        true,
     );
 
     store.save(&document).unwrap();

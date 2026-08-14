@@ -2,6 +2,7 @@ mod after_save;
 mod appearance;
 mod hotkeys;
 mod menu_bar;
+mod save_sound;
 
 use super::*;
 use std::{
@@ -77,6 +78,7 @@ fn settings_round_trip_through_atomic_write() {
         after_save: "reveal".into(),
         hotkeys: Hotkeys::default(),
         menu_bar_mode: true,
+        save_sound: false,
     };
 
     store.save(&document).unwrap();

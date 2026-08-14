@@ -108,6 +108,9 @@
       "binaries/ffmpeg",
       "binaries/ffprobe"
     ],
+    "resources": [
+      "resources/save-chime.wav"
+    ],
     "macOS": {
       "minimumSystemVersion": "14.0"
     }

@@ -17,6 +17,7 @@ const CURRENT_VERSION: u32 = 1;
 const DEFAULT_RETENTION_MINUTES: u8 = 10;
 const DEFAULT_APPEARANCE: &str = "system";
 const VALID_APPEARANCES: [&str; 3] = ["light", "dark", "system"];
+const DEFAULT_SAVE_SOUND: bool = true;
 
 /// Best-effort capture target identity that survives relaunch. Windows
 /// resolve by app bundle plus title; there is no stable id across launches.
@@ -69,6 +70,14 @@ pub(crate) struct SettingsDocument {
     /// `SettingsStore::load`.
     #[serde(default)]
     pub menu_bar_mode: bool,
+    /// Whether a successful save plays the confirmation chime. Defaults to
+    /// `true`, so it needs its own default function rather than
+    /// `#[serde(default)]`: a settings file written before PP-03 (and the
+    /// corrupt-file catch-all in `SettingsStore::load`) must land on the
+    /// sound being on, not off. Like `menu_bar_mode`, a plain `bool` has no
+    /// invalid values to sanitize.
+    #[serde(default = "default_save_sound")]
+    pub save_sound: bool,
 }
 
 fn current_version() -> u32 {
@@ -81,6 +90,10 @@ fn default_retention_minutes() -> u8 {
 
 fn default_appearance() -> String {
     DEFAULT_APPEARANCE.to_string()
+}
+
+fn default_save_sound() -> bool {
+    DEFAULT_SAVE_SOUND
 }
 
 /// Whether a value is one of the three appearance choices the settings
@@ -100,6 +113,7 @@ impl Default for SettingsDocument {
             after_save: after_save::default(),
             hotkeys: Hotkeys::default(),
             menu_bar_mode: false,
+            save_sound: DEFAULT_SAVE_SOUND,
         }
     }
 }
@@ -114,6 +128,7 @@ impl SettingsDocument {
         after_save: String,
         hotkeys: Hotkeys,
         menu_bar_mode: bool,
+        save_sound: bool,
     ) -> Self {
         Self {
             version: CURRENT_VERSION,
@@ -124,6 +139,7 @@ impl SettingsDocument {
             after_save,
             hotkeys,
             menu_bar_mode,
+            save_sound,
         }
     }
 
@@ -150,6 +166,7 @@ impl SettingsDocument {
             after_save: after_save::sanitized(self.after_save),
             hotkeys: hotkeys::sanitized(self.hotkeys),
             menu_bar_mode: self.menu_bar_mode,
+            save_sound: self.save_sound,
         }
     }
 }
@@ -171,6 +188,7 @@ pub struct SettingsSnapshot {
     pub after_save: String,
     pub hotkeys: Hotkeys,
     pub menu_bar_mode: bool,
+    pub save_sound: bool,
 }
 
 /// Resolves a persisted target against currently available sources. Returns
