@@ -6,6 +6,7 @@ mod encoder;
 mod hotkeys;
 mod library;
 mod packager;
+mod preview;
 mod replay;
 mod retention;
 
@@ -15,6 +16,10 @@ use editor::commands::{
     copy_export_to_clipboard, editor_context, editor_header, editor_keyframes, open_editor_window,
 };
 use editor::export::commands::{export_gif_replay, export_trimmed_replay};
+use library::commands::{
+    delete_replay, library_index, library_thumbnail, open_library_window, open_replay_file,
+};
+use preview::commands::preview_payload;
 use replay::{ReplayService, ReplaySnapshot};
 use tauri::{Emitter, Manager};
 
@@ -123,55 +128,6 @@ fn open_screen_recording_settings() -> Result<(), String> {
 #[tauri::command]
 fn open_export_folder(service: tauri::State<'_, CaptureService>) -> Result<(), String> {
     service.reveal_export_folder()
-}
-
-#[tauri::command]
-fn open_library_window(app: tauri::AppHandle) -> Result<(), String> {
-    desktop::open_library_window(&app)
-}
-
-#[tauri::command]
-fn library_index(service: tauri::State<'_, CaptureService>) -> library::LibraryIndex {
-    library::index(&service.resolved_save_destination())
-}
-
-#[tauri::command]
-fn open_replay_file(service: tauri::State<'_, CaptureService>, id: String) -> Result<(), String> {
-    library::open_replay_file(&service.resolved_save_destination(), &id)
-}
-
-/// Moves bundle `id`'s folder to the macOS Trash. The app cache dir is
-/// looked up the same way `library_thumbnail` does; when unavailable, the
-/// delete still proceeds — only the (best-effort) cache cleanup is skipped.
-#[tauri::command]
-fn delete_replay(
-    app: tauri::AppHandle,
-    service: tauri::State<'_, CaptureService>,
-    id: String,
-) -> Result<(), String> {
-    let cache_dir = app.path().app_cache_dir().ok();
-    library::delete_replay(
-        &service.resolved_save_destination(),
-        cache_dir.as_deref(),
-        &id,
-    )
-}
-
-/// Returns bundle `id`'s cached thumbnail as base64 JPEG, generating it on
-/// a cache miss. Cards call this lazily after the list has already
-/// rendered, so a miss (including "no cache dir available") never blocks
-/// the index — the frontend falls back to its styled placeholder.
-#[tauri::command]
-fn library_thumbnail(
-    app: tauri::AppHandle,
-    service: tauri::State<'_, CaptureService>,
-    id: String,
-) -> Result<String, String> {
-    let cache_dir = app
-        .path()
-        .app_cache_dir()
-        .map_err(|_| "library_thumbnail_unavailable".to_string())?;
-    library::thumbnail_base64(&service.resolved_save_destination(), &cache_dir, &id)
 }
 
 #[tauri::command]
@@ -329,6 +285,7 @@ pub fn run() {
             open_replay_file,
             delete_replay,
             library_thumbnail,
+            preview_payload,
             open_editor_window,
             editor_context,
             editor_header,

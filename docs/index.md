@@ -12,6 +12,7 @@
 - [Architecture](architecture/index.md)
 - [Specifications](specs/README.md)
 - [Execution Plans](exec-plans/README.md)
+- [libobs Migration Assessment](research/2026-08-12-libobs-migration-assessment.md)
 
 
 ## Rule

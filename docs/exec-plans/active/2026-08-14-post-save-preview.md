@@ -83,6 +83,12 @@ double-save check. Behavior lane.
 
 **Blocked by:** PP-01.
 
+**Note (found during PP-01 review):** a saved replay has two identifiers.
+`SavedReplaySnapshot::id` is a session counter (`replay-1`) understood only
+by the in-memory replay state; the on-disk id every filesystem-facing
+surface uses is `display_name`, the bundle's folder name. Pass
+`display_name` to the preview payload.
+
 ### PP-03 — Confirmation sound
 
 **Delivered behavior:** A short bundled chime plays on a successful save,
@@ -172,3 +178,22 @@ milestone check for this plan.
 ## Progress Log
 
 - 2026-08-14: Plan created; no tickets started.
+- 2026-08-14: PP-01 complete. New `preview` module (`preview/payload.rs`,
+  `preview/commands.rs`) exposes the `preview_payload(id)` command —
+  display name reused verbatim from `editor::header` (same title
+  convention), total bytes and video path from the same read, duration
+  derived from the bundle's evidence window and omitted when
+  `metadata.json` records none. Ids go through `library::resolve_bundle_dir`,
+  so anything outside the destination is rejected with `library_invalid_id`.
+  After-save gained `preview` as a valid value and as the fresh-install
+  default; `settings::after_save::sanitized` leaves any already-persisted
+  valid value (including the old `nothing` default) untouched, covered by a
+  new test. Routing moved into a new `replay/after_save_choice.rs` so the
+  choice-to-action mapping is testable without an `AppHandle`; the dispatch
+  now matches on that enum and its `Preview` arm is an explicit no-op
+  awaiting PP-02's window. Settings → Saving shows "Show preview" first.
+  Library command wrappers moved out of `lib.rs` into
+  `library/commands.rs` (mirroring `editor/commands.rs`) to make room under
+  the 350-line ceiling. Validation: `npm run check`, `npm run build`,
+  `cargo fmt --check`, `cargo clippy -D warnings`, `cargo test` (200 pass, 8 ignored),
+  `check-quality-gates.mjs`, `check-sonata.sh` — all green.

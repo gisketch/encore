@@ -8,6 +8,7 @@
   import { abbreviateHome } from "./savingSettings";
 
   const AFTER_SAVE_OPTIONS: { value: AfterSave; label: string }[] = [
+    { value: "preview", label: "Show preview" },
     { value: "reveal", label: "Show in Finder" },
     { value: "open_editor", label: "Open editor" },
     { value: "nothing", label: "Nothing" },
@@ -15,7 +16,9 @@
 
   let saveDestination = $state("");
   let home = $state("");
-  let afterSave = $state<AfterSave>("nothing");
+  // Matches the backend default (PP-01); replaced by the real snapshot on
+  // mount, so this only governs the first paint before `refresh` lands.
+  let afterSave = $state<AfterSave>("preview");
   let busy = $state(false);
 
   const displayDestination = $derived(

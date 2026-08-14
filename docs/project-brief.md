@@ -64,8 +64,9 @@ incomplete evidence and edge cases are closed as cannot reproduce.
 - Stack: Tauri v2 shell with a Svelte 5 and TypeScript frontend built by Vite,
   the framework-neutral `motion` package for intentional UI animation, and a
   Rust core. The macOS MVP uses ScreenCaptureKit through
-  `screencapturekit-rs`, VideoToolbox hardware H.264, a bundled FFmpeg sidecar
-  for muxing, and `tauri-plugin-global-shortcut` for the trigger.
+  `screencapturekit-rs`, AVFoundation with VideoToolbox hardware H.264 for
+  segment encoding/muxing, a bundled FFmpeg sidecar for later replay packaging,
+  and `tauri-plugin-global-shortcut` for the trigger.
 - Package manager: Cargo for Rust and npm for JavaScript dependencies/scripts.
 - Runtime: a native local macOS desktop process for the MVP, with platform
   boundaries retained for later Windows support.

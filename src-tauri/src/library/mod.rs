@@ -1,3 +1,4 @@
+pub(crate) mod commands;
 mod delete;
 mod group;
 mod guard;

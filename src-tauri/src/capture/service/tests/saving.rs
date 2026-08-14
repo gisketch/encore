@@ -102,7 +102,7 @@ fn save_destination_update_preserves_other_persisted_fields() {
 }
 
 #[test]
-fn after_save_defaults_to_nothing_and_round_trips_through_the_setter() {
+fn after_save_round_trips_through_the_setter() {
     let service = service_with_default_destination(scratch_default_destination());
     assert_eq!(service.after_save(), "nothing");
 
@@ -116,6 +116,9 @@ fn after_save_defaults_to_nothing_and_round_trips_through_the_setter() {
 #[test]
 fn an_invalid_after_save_value_is_rejected_without_touching_the_persisted_value() {
     let service = service_with_default_destination(scratch_default_destination());
+    // Persist a real choice first, so `load()` reads a written document
+    // rather than the fresh-install default.
+    service.set_after_save("nothing".into()).unwrap();
 
     let result = service.set_after_save("delete".into());
 
@@ -133,6 +136,17 @@ fn after_save_accepts_open_editor_and_round_trips_through_the_setter() {
     assert_eq!(snapshot.after_save, "open_editor");
     assert_eq!(service.after_save(), "open_editor");
     assert_eq!(service.0.settings.load().after_save, "open_editor");
+}
+
+#[test]
+fn after_save_accepts_preview_and_round_trips_through_the_setter() {
+    let service = service_with_default_destination(scratch_default_destination());
+
+    let snapshot = service.set_after_save("preview".into()).unwrap();
+
+    assert_eq!(snapshot.after_save, "preview");
+    assert_eq!(service.after_save(), "preview");
+    assert_eq!(service.0.settings.load().after_save, "preview");
 }
 
 #[test]

@@ -43,6 +43,13 @@ pub(crate) struct PendingReplaySnapshot {
     pub evidence_end_unix_ms: u64,
 }
 
+/// A saved replay carries two identifiers and they are not interchangeable.
+/// `id` is a session-scoped counter (`replay-1`) that only the in-memory
+/// replay state understands — `reveal_saved` looks it up, and it means
+/// nothing on disk. `display_name` is the name of the folder the packager
+/// published the bundle into (`destination/{display_name}`), which is the
+/// id the Library, Editor, and post-save preview all address a replay by.
+/// Anything that touches the filesystem wants `display_name`.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct SavedReplaySnapshot {
