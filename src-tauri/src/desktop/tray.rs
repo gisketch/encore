@@ -1,9 +1,9 @@
-use crate::capture::{CaptureService, CaptureState, HotkeyId, SettingsSnapshot};
+use crate::capture::{CaptureService, CaptureState, HotkeyId};
 use crate::hotkeys;
 use tauri::{
     menu::{IsMenuItem, Menu, MenuItem, PredefinedMenuItem},
     tray::{TrayIcon, TrayIconBuilder},
-    AppHandle, Emitter, Listener, Manager, Wry,
+    AppHandle, Listener, Manager, Wry,
 };
 
 const CAPTURE_STATE_CHANGED_EVENT: &str = "capture-state-changed";
@@ -150,31 +150,6 @@ fn rebuild(app: &AppHandle, capture: CaptureState) {
     if let Ok(menu) = build_menu(app, &menu_actions(capture)) {
         let _ = tray.0.set_menu(Some(menu));
     }
-}
-
-/// Applies a menu-bar-mode change: persists it and shows or hides the bar.
-///
-/// The tray menu no longer consults this — it always carries every action
-/// (MB-01) — so this is now only the Settings toggle's bar-visibility
-/// switch, kept here until MB-02 retires it along with the setting itself.
-pub(crate) fn set_menu_bar_mode(
-    app: &AppHandle,
-    enabled: bool,
-) -> Result<SettingsSnapshot, String> {
-    let capture = app
-        .try_state::<CaptureService>()
-        .ok_or_else(|| "capture_unavailable".to_string())?;
-    let snapshot = capture.set_menu_bar_mode(enabled)?;
-    apply_bar_visibility(app, enabled);
-    let _ = app.emit("settings-changed", snapshot.clone());
-    Ok(snapshot)
-}
-
-fn apply_bar_visibility(app: &AppHandle, hidden: bool) {
-    let hide: [fn(&AppHandle); 2] = [crate::desktop::show_window_without_focus, |app| {
-        crate::desktop::hide_window(app)
-    }];
-    hide[usize::from(hidden)](app);
 }
 
 fn handle_menu_event(app: &AppHandle, event: tauri::menu::MenuEvent) {

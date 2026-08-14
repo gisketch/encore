@@ -1,6 +1,6 @@
 mod tray;
 
-use crate::capture::{CaptureService, SettingsSnapshot};
+use crate::capture::CaptureService;
 use tauri::{Manager, PhysicalPosition};
 
 pub fn setup(app: &mut tauri::App) -> tauri::Result<()> {
@@ -14,20 +14,9 @@ pub fn setup(app: &mut tauri::App) -> tauri::Result<()> {
     Ok(())
 }
 
-/// Wires the tray to live capture state (see `tray::wire`), including
-/// honoring a persisted "menu bar mode" at startup.
+/// Wires the tray to live capture state (see `tray::wire`).
 pub fn wire_capture_menu(app: &tauri::AppHandle, capture: &CaptureService) {
     tray::wire(app, capture);
-}
-
-/// Applies a menu-bar-mode change: persists it, shows/hides the bar, and
-/// rebuilds the tray menu to match. Shared by the `update_menu_bar_mode`
-/// command and the tray's own "Show Floating Bar" item.
-pub fn set_menu_bar_mode(
-    app: &tauri::AppHandle,
-    enabled: bool,
-) -> Result<SettingsSnapshot, String> {
-    tray::set_menu_bar_mode(app, enabled)
 }
 
 pub fn handle_window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
@@ -41,12 +30,6 @@ pub(crate) fn show_window_without_focus(app: &tauri::AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
         let _ = window.show();
         let _ = position_floating_window(&window);
-    }
-}
-
-pub(crate) fn hide_window(app: &tauri::AppHandle) {
-    if let Some(window) = app.get_webview_window("main") {
-        let _ = window.hide();
     }
 }
 

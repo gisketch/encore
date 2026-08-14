@@ -39,7 +39,6 @@ fn save_sound_off_round_trips_through_atomic_write() {
         "preview".into(),
         Hotkeys::default(),
         false,
-        false,
     );
 
     store.save(&document).unwrap();

@@ -11,7 +11,6 @@ fn save_destination_and_after_save_round_trip_through_atomic_write() {
         Some(PathBuf::from("/Users/example/Movies/Custom")),
         "reveal".into(),
         Hotkeys::default(),
-        false,
         true,
     );
 
@@ -65,7 +64,6 @@ fn preview_after_save_round_trips_through_atomic_write() {
         None,
         "preview".into(),
         Hotkeys::default(),
-        false,
         true,
     );
 
@@ -101,7 +99,6 @@ fn open_editor_after_save_round_trips_through_atomic_write() {
         None,
         "open_editor".into(),
         Hotkeys::default(),
-        false,
         true,
     );
 

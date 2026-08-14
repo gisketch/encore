@@ -15,7 +15,6 @@ fn hotkeys_round_trip_through_atomic_write() {
             pause_capture: "Cmd+Shift+P".into(),
             open_library: "Ctrl+Alt+L".into(),
         },
-        false,
         true,
     );
 

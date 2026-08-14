@@ -207,14 +207,6 @@ fn update_hotkey(
     Ok(broadcast_settings(&app, capture.inner()))
 }
 
-/// Applies, persists, and broadcasts a menu-bar-mode change: hides/shows
-/// the floating bar and reshapes the tray menu to match, via the same path
-/// the tray's own "Show Floating Bar" item uses.
-#[tauri::command]
-fn update_menu_bar_mode(app: tauri::AppHandle, enabled: bool) -> Result<SettingsSnapshot, String> {
-    desktop::set_menu_bar_mode(&app, enabled)
-}
-
 /// Applies, persists, and broadcasts the save-confirmation-sound toggle.
 #[tauri::command]
 fn update_save_sound(
@@ -315,7 +307,6 @@ pub fn run() {
             update_save_destination,
             update_after_save,
             update_hotkey,
-            update_menu_bar_mode,
             update_save_sound
         ])
         .run(tauri::generate_context!())

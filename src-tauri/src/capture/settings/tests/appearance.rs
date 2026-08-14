@@ -41,7 +41,6 @@ fn appearance_round_trips_through_atomic_write() {
         None,
         "nothing".into(),
         Hotkeys::default(),
-        false,
         true,
     );
 

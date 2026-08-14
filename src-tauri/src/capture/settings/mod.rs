@@ -63,18 +63,11 @@ pub(crate) struct SettingsDocument {
     pub after_save: String,
     #[serde(default)]
     pub hotkeys: Hotkeys,
-    /// Whether the floating bar is hidden in favor of a tray-only presence.
-    /// A plain `bool` needs no sanitization: a missing or wrongly-typed
-    /// value falls back to `false` (the historical always-visible bar)
-    /// through `#[serde(default)]`/the corrupt-file catch-all in
-    /// `SettingsStore::load`.
-    #[serde(default)]
-    pub menu_bar_mode: bool,
     /// Whether a successful save plays the confirmation chime. Defaults to
     /// `true`, so it needs its own default function rather than
     /// `#[serde(default)]`: a settings file written before PP-03 (and the
     /// corrupt-file catch-all in `SettingsStore::load`) must land on the
-    /// sound being on, not off. Like `menu_bar_mode`, a plain `bool` has no
+    /// sound being on, not off. A plain `bool` has no
     /// invalid values to sanitize.
     #[serde(default = "default_save_sound")]
     pub save_sound: bool,
@@ -112,7 +105,6 @@ impl Default for SettingsDocument {
             save_destination: None,
             after_save: after_save::default(),
             hotkeys: Hotkeys::default(),
-            menu_bar_mode: false,
             save_sound: DEFAULT_SAVE_SOUND,
         }
     }
@@ -127,7 +119,6 @@ impl SettingsDocument {
         save_destination: Option<PathBuf>,
         after_save: String,
         hotkeys: Hotkeys,
-        menu_bar_mode: bool,
         save_sound: bool,
     ) -> Self {
         Self {
@@ -138,7 +129,6 @@ impl SettingsDocument {
             save_destination,
             after_save,
             hotkeys,
-            menu_bar_mode,
             save_sound,
         }
     }
@@ -165,7 +155,6 @@ impl SettingsDocument {
             save_destination: self.save_destination,
             after_save: after_save::sanitized(self.after_save),
             hotkeys: hotkeys::sanitized(self.hotkeys),
-            menu_bar_mode: self.menu_bar_mode,
             save_sound: self.save_sound,
         }
     }
@@ -187,7 +176,6 @@ pub struct SettingsSnapshot {
     pub save_destination: PathBuf,
     pub after_save: String,
     pub hotkeys: Hotkeys,
-    pub menu_bar_mode: bool,
     pub save_sound: bool,
 }
 

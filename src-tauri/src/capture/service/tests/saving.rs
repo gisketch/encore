@@ -42,7 +42,6 @@ fn service_with_default_destination(default_destination: PathBuf) -> CaptureServ
         default_destination,
         after_save: RwLock::new("nothing".into()),
         hotkeys: RwLock::new(Hotkeys::default()),
-        menu_bar_mode: RwLock::new(false),
         save_sound: RwLock::new(true),
         diagnostics: DiagnosticLog::disabled(),
         user_paused: AtomicBool::new(false),
@@ -174,28 +173,4 @@ fn save_sound_update_preserves_other_persisted_fields() {
     assert_eq!(reloaded.retention_minutes, 5);
     assert_eq!(reloaded.after_save, "reveal");
     assert!(!reloaded.save_sound);
-}
-
-#[test]
-fn menu_bar_mode_defaults_to_false_and_round_trips_through_the_setter() {
-    let service = service_with_default_destination(scratch_default_destination());
-    assert!(!service.menu_bar_mode());
-
-    let snapshot = service.set_menu_bar_mode(true).unwrap();
-
-    assert!(snapshot.menu_bar_mode);
-    assert!(service.menu_bar_mode());
-    assert!(service.0.settings.load().menu_bar_mode);
-}
-
-#[test]
-fn menu_bar_mode_update_preserves_other_persisted_fields() {
-    let service = service_with_default_destination(scratch_default_destination());
-    service.set_retention_minutes(5).unwrap();
-
-    service.set_menu_bar_mode(true).unwrap();
-
-    let reloaded = service.0.settings.load();
-    assert_eq!(reloaded.retention_minutes, 5);
-    assert!(reloaded.menu_bar_mode);
 }

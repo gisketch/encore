@@ -2,7 +2,6 @@ use super::CaptureService;
 use crate::capture::settings::SettingsSnapshot;
 
 /// The save-confirmation sound is a small, independently-persisted slice of
-/// the settings document, mirroring `menu_bar_mode`'s pattern: it has
 /// nothing to do with capture state, but the replay dispatch reads it at
 /// the moment a save reaches the `saved` state, from outside the Settings
 /// window. Deliberately separate from the after-save choice, so a tester

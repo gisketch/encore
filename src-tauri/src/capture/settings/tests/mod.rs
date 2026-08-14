@@ -1,7 +1,7 @@
 mod after_save;
 mod appearance;
 mod hotkeys;
-mod menu_bar;
+mod retired_fields;
 mod save_sound;
 
 use super::*;
@@ -77,7 +77,6 @@ fn settings_round_trip_through_atomic_write() {
         save_destination: Some(PathBuf::from("/Users/example/Movies/Custom")),
         after_save: "reveal".into(),
         hotkeys: Hotkeys::default(),
-        menu_bar_mode: true,
         save_sound: false,
     };
 
