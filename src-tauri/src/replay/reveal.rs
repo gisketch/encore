@@ -1,6 +1,6 @@
 use std::path::Path;
 
-pub(super) fn reveal_in_finder(file: &Path) -> Result<(), ()> {
+pub(crate) fn reveal_in_finder(file: &Path) -> Result<(), ()> {
     #[cfg(target_os = "macos")]
     {
         std::process::Command::new("open")

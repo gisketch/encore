@@ -25,6 +25,18 @@ pub(crate) fn open_replay_file(
     super::open_replay_file(&service.resolved_save_destination(), &id)
 }
 
+/// Reveals bundle `id` in Finder with its replay file selected — what the
+/// post-save preview's "Open Folder" means, as opposed to
+/// `open_export_folder`, which opens the destination folder without
+/// pointing at any particular replay.
+#[tauri::command]
+pub(crate) fn reveal_replay_bundle(
+    service: tauri::State<'_, CaptureService>,
+    id: String,
+) -> Result<(), String> {
+    super::reveal_bundle(&service.resolved_save_destination(), &id)
+}
+
 /// Moves bundle `id`'s folder to the macOS Trash. The app cache dir is
 /// looked up the same way `library_thumbnail` does; when unavailable, the
 /// delete still proceeds — only the (best-effort) cache cleanup is skipped.

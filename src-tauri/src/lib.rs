@@ -19,6 +19,7 @@ use editor::commands::{
 use editor::export::commands::{export_gif_replay, export_trimmed_replay};
 use library::commands::{
     delete_replay, library_index, library_thumbnail, open_library_window, open_replay_file,
+    reveal_replay_bundle,
 };
 use preview::commands::{preview_context, preview_payload};
 use replay::{ReplayService, ReplaySnapshot};
@@ -298,6 +299,7 @@ pub fn run() {
             open_replay_file,
             delete_replay,
             library_thumbnail,
+            reveal_replay_bundle,
             preview_payload,
             preview_context,
             open_editor_window,

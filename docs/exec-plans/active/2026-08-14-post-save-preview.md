@@ -259,3 +259,43 @@ milestone check for this plan.
   `cargo fmt --check`, `cargo clippy -D warnings`, `cargo test` (213 pass,
   8 ignored), `check-quality-gates.mjs`, `check-sonata.sh` — all green.
   Not yet covered: the manual save-with-sound / toggle-off macOS smokes.
+- 2026-08-14: PP-04 complete. The card's reserved row now holds Edit /
+  Share / Open Folder, living in a new `PreviewActions.svelte` rather than
+  in `PreviewWindow.svelte` (already tracked by the SCC gate at its PP-02
+  complexity of 2, which this leaves unchanged — the parent gained only an
+  import and an unconditional child tag). All three target the shown
+  payload: `payload.id` is the bundle folder name, exactly the id
+  `open_editor_window` and the library commands resolve, and
+  `payload.videoPath` sits inside the save destination so it clears
+  `copy_export_to_clipboard`'s own `guard_within_destination` check.
+  Open Folder needed a new command: `open_export_folder` opens the
+  *destination folder* without pointing at any replay, while the spec asks
+  for the saved bundle to be revealed. `library::reveal_bundle`
+  (`library/reveal.rs`) resolves the id through the same
+  `guard::resolve_replay_file` every other library entry point uses
+  (`library_invalid_id`), reports `library_replay_missing` for a bundle
+  that is not on disk, and otherwise delegates to `replay::reveal_in_finder`
+  — promoted from `pub(super)` to `pub(crate)` so the `open -R` invocation
+  is not duplicated — failing as `library_reveal_failed`. Exposed as the
+  `reveal_replay_bundle` command; its guard rejections and the missing-bundle
+  case are covered by tests that never reach Finder. Dismiss-on-action
+  applies to Edit and Open Folder *only on success*: a failure that hid the
+  preview would take its own error label with it, so failures instead
+  surface as a brief inline label (`Editor failed` / `Reveal failed` /
+  `Copy failed`, 4s) in the same slot Share's "Copied" confirmation uses
+  (2s), absolutely positioned so a 320pt card never reflows mid-interaction.
+  Because the window is hidden-and-reused rather than closed, the row never
+  remounts, so an `$effect` keyed on the payload clears any lingering
+  notice when `preview-changed` swaps the replay in — a re-shown preview
+  can never inherit the previous save's "Copied". Styling is tokens only:
+  accent pill with `--shadow-accent` for Edit, `--surface-raised` hairline
+  pills for the other two, `--health` / `--attention` for the notice.
+  **No capability change:** these are application commands reached through
+  `invoke`, and Tauri v2 capabilities gate core/plugin permissions, not
+  `generate_handler!` commands, so `capabilities/preview.json` still grants
+  only `core:default` + `core:window:allow-hide` — in particular nothing
+  focus-related was added. Validation: `npm run check`, `npm run build`,
+  `cargo fmt --check`, `cargo clippy -D warnings`, `cargo test`,
+  `check-quality-gates.mjs`, `check-sonata.sh` — all green. Not yet
+  covered: the macOS smoke exercising all three buttons against one known
+  replay.

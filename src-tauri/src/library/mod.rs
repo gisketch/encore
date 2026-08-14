@@ -2,6 +2,7 @@ pub(crate) mod commands;
 mod delete;
 mod group;
 mod guard;
+mod reveal;
 mod scan;
 #[cfg(test)]
 mod tests;
@@ -14,6 +15,7 @@ pub use group::{LibraryEntry, LibraryGroup};
 /// than duplicating it.
 #[allow(unused_imports)]
 pub(crate) use guard::{resolve_bundle_dir, resolve_replay_file};
+pub(crate) use reveal::reveal_bundle;
 
 use base64::{engine::general_purpose::STANDARD, Engine};
 use chrono::Local;

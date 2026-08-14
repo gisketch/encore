@@ -90,7 +90,7 @@
 
 .preview-meta {
   flex: 0 0 auto;
-  padding: 10px 14px 12px;
+  padding: 10px 14px 6px;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -113,3 +113,55 @@
   font: 500 10px/1 var(--font-mono);
   letter-spacing: 0.02em;
 }
+
+/* Action row. `position: relative` is what lets the inline notice sit
+   above the buttons without reflowing a 320pt-wide card mid-interaction. */
+.preview-actions {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px 12px;
+}
+
+.preview-action {
+  flex: 1 1 auto;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid var(--hairline);
+  border-radius: 13px;
+  background: var(--surface-raised);
+  color: var(--ink-secondary);
+  font-size: 10.5px;
+  font-weight: 650;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.preview-action:hover { background: var(--surface-inset); }
+
+.preview-action--primary {
+  border: 0;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  box-shadow: var(--shadow-accent);
+}
+
+.preview-action--primary:hover { background: var(--accent); opacity: 0.92; }
+
+.preview-action:disabled { opacity: 0.5; cursor: default; }
+
+.preview-notice {
+  position: absolute;
+  right: 14px;
+  bottom: 40px;
+  padding: 2px 8px;
+  border-radius: 9px;
+  background: var(--surface-inset);
+  color: var(--health);
+  font: 650 10px/1.6 var(--font-mono);
+  letter-spacing: 0.02em;
+}
+
+.preview-notice--failed { color: var(--attention); }

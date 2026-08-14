@@ -5,6 +5,7 @@
   import { onMount } from "svelte";
   import { formatCardSubline } from "./libraryFormat";
   import { fetchThumbnailDataUrl } from "./libraryThumbnail";
+  import PreviewActions from "./PreviewActions.svelte";
   import type { PreviewPayload } from "./previewTypes";
 
   let payload = $state<PreviewPayload | null>(null);
@@ -77,7 +78,7 @@
         {formatCardSubline(payload?.durationSeconds ?? null, payload?.totalBytes ?? 0)}
       </p>
     </div>
-    <!-- PP-04 hangs Edit / Share / Open Folder off the bottom of this
-         card; the meta block is sized to leave that row its space. -->
+
+    <PreviewActions {payload} onDismiss={dismiss} />
   </section>
 </main>
