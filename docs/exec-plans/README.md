@@ -13,6 +13,8 @@ Use checked-in plans for multi-step or high-risk work.
 - [Paper & grain UI migration](active/2026-08-13-paper-grain-ui.md) — PG-01
   through PG-15 implemented and reviewed (PG-09 start-at-login remains
   deferred); manual macOS smokes of the new windows remain outstanding.
+- [Post-save preview](active/2026-08-14-post-save-preview.md) — PP-01 through
+  PP-05 drafted from the approved spec; starts with PP-01.
 
 Use this name pattern for new plans:
 
