@@ -87,6 +87,11 @@
   #download{padding:110px 0 40px;text-align:center}
   .req{margin:22px auto 0;display:inline-flex;gap:8px;align-items:center;padding:8px 16px;border-radius:999px;background:var(--surface);border:1px solid var(--hairline);color:var(--ink-muted);font:500 12px/1 "Spline Sans Mono",monospace}
   .req i{width:6px;height:6px;border-radius:50%;background:var(--health)}
+  .firstrun{max-width:560px;margin:44px auto 0;padding:24px 28px;border-radius:16px;background:var(--surface);border:1px solid var(--hairline);text-align:left}
+  .firstrun h3{margin:0 0 10px;font-size:15px;font-weight:650}
+  .firstrun p{color:var(--ink-soft);font-size:14px}
+  .firstrun ol{margin:12px 0 0;padding-left:20px;color:var(--ink-soft);font-size:14px}
+  .firstrun li{margin:6px 0}
   footer{padding:60px 0 50px;text-align:center;color:var(--ink-faint);font-size:13px}
   footer a{color:var(--ink-soft)}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
@@ -161,6 +166,16 @@
     <a class="btn" href="https://github.com/gisketch/encore/releases/latest/download/Encore-macOS-arm64.dmg">Download for macOS</a>
   </div>
   <p class="req"><i aria-hidden="true"></i>macOS 14 Sonoma or later · Apple Silicon</p>
+
+  <div class="firstrun">
+    <h3>Opening it the first time</h3>
+    <p>Encore isn't notarized by Apple yet, so macOS will say it "cannot be opened because the developer cannot be verified". That's expected for an unsigned build, not a sign of anything wrong.</p>
+    <ol>
+      <li>Drag <strong>Encore</strong> into Applications.</li>
+      <li><strong>Right-click</strong> it (or Control-click) and choose <strong>Open</strong>, then <strong>Open</strong> again in the dialog. macOS remembers the choice.</li>
+      <li>Grant <strong>Screen Recording</strong> when asked, then relaunch — macOS requires one restart after the first grant.</li>
+    </ol>
+  </div>
 </section>
 
 <footer class="wrap">

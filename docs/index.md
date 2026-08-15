@@ -6,6 +6,7 @@
 - [Core Beliefs](core-beliefs.md)
 - [Quality](quality.md)
 - [Issue Tracking](issue-tracker.md)
+- [Releasing and Hosting](releasing.md)
 
 ## Deeper Context
 
