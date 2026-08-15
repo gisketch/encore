@@ -59,32 +59,14 @@ the job summary. Nothing needs changing but adding the secrets.
 
 ## Hosting encore.gisketch.com
 
-The page is a single self-contained file, so deployment is a copy. `Site`
-uploads it beside the live file and moves it into place, so an interrupted
-transfer can never leave half a page being served.
+The setup steps — Cloudflare, nginx, and the deploy secrets — live in
+[DEPLOYMENT_GUIDE.md](../DEPLOYMENT_GUIDE.md) so there is one copy of them.
 
-Enable it once:
-
-1. Create a deploy key on the VPS and add the private half as `VPS_SSH_KEY`.
-2. Add `VPS_HOST`, `VPS_USER`, `VPS_SITE_PATH` (and `VPS_PORT` if not 22).
-3. Set the repository **variable** `SITE_ENABLED` to `true` — until then the
-   job skips rather than failing every push.
-
-Nginx needs only a static root and TLS:
-
-```nginx
-server {
-    server_name encore.gisketch.com;
-    root /var/www/encore;
-    index index.html;
-    location / { try_files $uri $uri/ =404; }
-}
-```
-
-Then `certbot --nginx -d encore.gisketch.com` for the certificate.
-
-The download button points at GitHub's release CDN rather than the VPS, so
-the site stays a single small file and releases never touch the server.
+The page is a single self-contained file, so deployment is a copy. The Site
+workflow uploads it beside the live file and moves it into place, so an
+interrupted transfer never leaves half a page being served. The download
+button points at GitHub's release CDN rather than the VPS, so the site stays
+one small file and releases never touch the server.
 
 ## Known gaps
 

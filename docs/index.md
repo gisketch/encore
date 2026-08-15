@@ -6,7 +6,8 @@
 - [Core Beliefs](core-beliefs.md)
 - [Quality](quality.md)
 - [Issue Tracking](issue-tracker.md)
-- [Releasing and Hosting](releasing.md)
+- [Deployment Guide](../DEPLOYMENT_GUIDE.md) — the setup steps
+- [Releasing and Hosting](releasing.md) — reference detail
 
 ## Deeper Context
 
