@@ -194,6 +194,13 @@ select:focus-visible {
   background: var(--icon-stroke);
 }
 
+.glyph-hide {
+  width: 10px;
+  height: 1.5px;
+  border-radius: 1px;
+  background: var(--icon-stroke);
+}
+
 .glyph-chevron {
   width: 7px;
   height: 7px;

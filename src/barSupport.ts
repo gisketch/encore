@@ -38,3 +38,10 @@ export function sourceDetail(
 ): string | null {
   return source ? `last ${minutes} min · ${source.label}` : null;
 }
+
+/** Hides the floating bar to the menu bar. The window is only ever hidden,
+ *  never closed, so the menu bar's "Show Action Bar" item (and a
+ *  double-click on its icon) bring this exact window back. */
+export function hideBarToMenuBar() {
+  void getCurrentWindow().hide();
+}

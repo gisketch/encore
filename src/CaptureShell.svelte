@@ -4,7 +4,7 @@
   import { animate } from "motion";
   import { onMount } from "svelte";
   import BarAdvancedRow from "./BarAdvancedRow.svelte";
-  import { resizeBarWindow } from "./barSupport";
+  import { hideBarToMenuBar, resizeBarWindow } from "./barSupport";
   import RailActions from "./RailActions.svelte";
   import ReplayStatus from "./ReplayStatus.svelte";
 
@@ -293,6 +293,17 @@
         onRetryReplay={retryReplay}
         onRevealReplay={revealSavedReplay}
       />
+
+      <button
+        class="icon-button"
+        type="button"
+        title="Hide to the menu bar"
+        aria-label="Hide to the menu bar"
+        onclick={hideBarToMenuBar}
+        disabled={!native}
+      >
+        <i class="glyph-hide" aria-hidden="true"></i>
+      </button>
 
       <button
         class="icon-button"
