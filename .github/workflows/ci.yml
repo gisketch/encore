@@ -61,5 +61,11 @@ jobs:
         run: cargo test
         working-directory: src-tauri
 
+      # The SCC complexity gate is enabled in .sonata/quality-gates.json, and
+      # the binary is installed into .sonata/bin (gitignored) rather than
+      # committed, so CI has to fetch it the same way a developer does.
+      - name: Install quality tools
+        run: node scripts/install-quality-tools.mjs
+
       - name: Harness and quality gates
         run: ./scripts/check-sonata.sh
