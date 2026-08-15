@@ -82,11 +82,23 @@ enum Entry {
     Separator(PredefinedMenuItem<Wry>),
 }
 
-/// Translates an action list into a real Tauri menu, inserting a separator
-/// before `ShowActionBar` and before `Quit` so the capture actions, the
-/// window action, and quitting read as three groups.
-fn build_menu(app: &AppHandle, actions: &[TrayAction]) -> tauri::Result<Menu<Wry>> {
+/// Translates an action list into a real Tauri menu: a disabled status
+/// line first, then the actions, with a separator before `ShowActionBar`
+/// and before `Quit` so the capture actions, the window action, and
+/// quitting read as three groups.
+fn build_menu(app: &AppHandle, actions: &[TrayAction], status: &str) -> tauri::Result<Menu<Wry>> {
     let mut entries = Vec::new();
+    // A disabled first line reporting whether capture is actually running,
+    // then a separator. Always present, so this adds no branching here; the
+    // text itself comes from `tray_status`.
+    entries.push(Entry::Item(MenuItem::with_id(
+        app,
+        "status",
+        status,
+        false,
+        None::<&str>,
+    )?));
+    entries.push(Entry::Separator(PredefinedMenuItem::separator(app)?));
     for (index, action) in actions.iter().enumerate() {
         let _ = index;
         let boundary = [TrayAction::Quit, TrayAction::ShowActionBar].contains(action) && index > 0;
@@ -115,7 +127,11 @@ fn build_menu(app: &AppHandle, actions: &[TrayAction]) -> tauri::Result<Menu<Wry
 /// non-menu-bar shape; `wire` (called once `CaptureService` exists)
 /// immediately rebuilds it to match the persisted mode.
 pub(crate) fn build(app: &mut tauri::App) -> tauri::Result<()> {
-    let menu = build_menu(app.handle(), &menu_actions(CaptureState::Stopped))?;
+    let menu = build_menu(
+        app.handle(),
+        &menu_actions(CaptureState::Stopped),
+        super::tray_status::status_label(CaptureState::Stopped),
+    )?;
     let mut tray = TrayIconBuilder::with_id("encore")
         .menu(&menu)
         .tooltip("Encore — local replay")
@@ -148,7 +164,8 @@ fn rebuild(app: &AppHandle, capture: CaptureState) {
     let Some(tray) = app.try_state::<TrayHandle>() else {
         return;
     };
-    if let Ok(menu) = build_menu(app, &menu_actions(capture)) {
+    let status = super::tray_status::status_label(capture);
+    if let Ok(menu) = build_menu(app, &menu_actions(capture), status) {
         let _ = tray.0.set_menu(Some(menu));
     }
 }

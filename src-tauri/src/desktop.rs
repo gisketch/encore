@@ -1,5 +1,6 @@
 mod tray;
 mod tray_click;
+mod tray_status;
 
 use crate::capture::CaptureService;
 use tauri::{Manager, PhysicalPosition};
