@@ -9,98 +9,154 @@
 <meta property="og:description" content="Press one key after the bug happens. Free, open source, everything stays on your machine.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://encore.gisketch.com/">
+<meta name="theme-color" content="#f3ecda">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%237a9b6d'/%3E%3Cg fill='%23fdfaf2'%3E%3Crect x='17' y='29' width='7' height='16' rx='3.5'/%3E%3Crect x='28.5' y='18' width='7' height='27' rx='3.5'/%3E%3Crect x='40' y='25' width='7' height='20' rx='3.5'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&family=Young+Serif&display=swap" rel="stylesheet">
 <style>
   :root{
-    --accent:#7a9b6d; --accent-deep:#6b8b5f; --ink:#37322a; --ink-soft:#6b6252;
-    --ink-muted:#8c8371; --ink-faint:#a3987f; --paper:#f3ecda; --surface:#faf6ec;
-    --raised:#fffdf6; --hairline:rgba(70,58,35,.14); --dark:#262019; --dark-surface:#322c22;
-    --paper-on-dark:#ece4d2; --health:#93b28a;
+    --accent:#7a9b6d; --ink:#37322a; --ink-soft:#6b6252; --ink-muted:#8c8371;
+    --ink-faint:#a3987f; --paper:#f3ecda; --surface:#faf6ec; --raised:#fffdf6;
+    --inset:#f3ecda; --hairline:rgba(70,58,35,.14); --hairline-soft:rgba(70,58,35,.09);
+    --dark:#262019; --paper-on-dark:#ece4d2; --health:#93b28a; --warn:#c07a5e;
     --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E");
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth}
-  body{
-    background:var(--paper); background-image:var(--grain);
-    color:var(--ink); font:400 16px/1.6 "Instrument Sans",system-ui,sans-serif;
-    -webkit-font-smoothing:antialiased;
-  }
+  body{background:var(--paper);background-image:var(--grain);color:var(--ink);
+    font:400 16px/1.6 "Instrument Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
   h1,h2{font-family:"Young Serif",Georgia,serif;font-weight:400;letter-spacing:-.015em;text-wrap:balance}
   a{color:inherit}
-  .wrap{max-width:1100px;margin:0 auto;padding:0 32px}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 32px}
   .mono{font:500 11px/1 "Spline Sans Mono",ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase}
 
+  /* Scroll reveal */
+  [data-reveal]{opacity:0;transform:translateY(18px);transition:opacity .7s cubic-bezier(.2,.7,.3,1),transform .7s cubic-bezier(.2,.7,.3,1);transition-delay:var(--rd,0s)}
+  [data-reveal].in{opacity:1;transform:none}
+
   /* Hero */
-  header{padding:88px 0 0;text-align:center}
-  .mark{width:76px;height:76px;display:block;margin:0 auto 26px;filter:drop-shadow(0 10px 24px rgba(60,45,20,.18))}
+  header{padding:96px 0 0;text-align:center}
+  .mark{width:78px;height:78px;display:block;margin:0 auto 26px;filter:drop-shadow(0 12px 26px rgba(60,45,20,.2));animation:rise .9s cubic-bezier(.2,.7,.3,1) both}
+  @keyframes rise{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
   .eyebrow{color:var(--ink-muted)}
-  h1{margin:18px auto 0;max-width:760px;font-size:clamp(40px,5.6vw,68px);line-height:1.08}
-  .lede{margin:22px auto 0;max-width:600px;color:var(--ink-soft);font-size:17px}
+  h1{margin:18px auto 0;max-width:780px;font-size:clamp(40px,5.8vw,70px);line-height:1.06}
+  .lede{margin:22px auto 0;max-width:610px;color:var(--ink-soft);font-size:17px}
   .cta{margin:34px 0 0;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-  .btn{
-    display:inline-flex;align-items:center;gap:10px;height:52px;padding:0 26px;border-radius:26px;
+  .btn{display:inline-flex;align-items:center;gap:10px;height:52px;padding:0 26px;border-radius:26px;
     background:var(--accent);color:#fff8f2;font-weight:650;font-size:15px;text-decoration:none;
-    box-shadow:0 4px 16px color-mix(in oklab,var(--accent) 38%,transparent);transition:filter .15s,transform .15s;
-  }
-  .btn:hover{filter:brightness(1.06);transform:translateY(-1px)}
+    box-shadow:0 4px 16px color-mix(in oklab,var(--accent) 38%,transparent);transition:filter .18s,transform .18s,box-shadow .18s}
+  .btn:hover{filter:brightness(1.06);transform:translateY(-2px);box-shadow:0 8px 22px color-mix(in oklab,var(--accent) 44%,transparent)}
   .btn--ghost{background:var(--raised);color:var(--ink);border:1px solid var(--hairline);box-shadow:none}
+  .btn--ghost:hover{box-shadow:0 6px 16px rgba(60,45,20,.12)}
   .fineprint{margin:16px 0 0;color:var(--ink-faint);font-size:13px}
 
-  /* Bar mock */
-  .shot{margin:64px auto 0;max-width:720px}
-  .bar{
-    display:flex;align-items:center;gap:12px;padding:9px 12px 9px 16px;border-radius:32px;
+  /* Action bar mock */
+  .shot{margin:70px auto 0;max-width:720px}
+  .bar{display:flex;align-items:center;gap:12px;padding:9px 12px 9px 16px;border-radius:32px;
     background:var(--surface);background-image:var(--grain);border:1px solid var(--hairline);
-    box-shadow:0 18px 44px rgba(60,45,20,.2),0 2px 6px rgba(60,45,20,.08);
-  }
+    box-shadow:0 20px 48px rgba(60,45,20,.2),0 2px 6px rgba(60,45,20,.08);animation:float 7s ease-in-out infinite}
+  @keyframes float{50%{transform:translateY(-6px)}}
   .chip{width:34px;height:34px;flex:none;display:flex;align-items:flex-end;justify-content:center;gap:3px;padding:8px 0;border-radius:11px;background:color-mix(in oklab,var(--accent) 14%,#fff)}
   .chip i{width:3px;border-radius:2px;background:var(--accent)}
-  .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);flex:none;box-shadow:0 0 0 0 color-mix(in oklab,var(--accent) 45%,transparent);animation:pulse 1.8s ease-out infinite}
+  @keyframes pulse{50%{box-shadow:0 0 0 7px color-mix(in oklab,var(--accent) 0%,transparent)}}
   .barcopy{display:grid;gap:2px;text-align:left;min-width:0}
   .barcopy strong{font-size:13.5px;font-weight:650}
   .barcopy small{font:500 10px/1.2 "Spline Sans Mono",monospace;color:var(--ink-muted)}
   .save{margin-left:auto;display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:20px;background:var(--accent);color:#fff8f2;font-weight:650;font-size:12.5px;flex:none}
   .save kbd{font:600 9px/1 "Spline Sans Mono",monospace;color:rgba(255,244,235,.78)}
-  .caption{margin:14px 0 0;text-align:center;color:var(--ink-faint);font-size:13px}
+  .caption{margin:16px 0 0;text-align:center;color:var(--ink-faint);font-size:13px}
 
-  /* Sections */
-  section{padding:110px 0 0}
-  h2{font-size:clamp(26px,3.2vw,34px);line-height:1.22}
+  section{padding:120px 0 0}
+  h2{font-size:clamp(26px,3.3vw,35px);line-height:1.2}
   .kicker{color:var(--accent);font-weight:600;font-size:13px;letter-spacing:.04em;margin:0 0 10px}
   .strike{color:var(--ink-faint);text-decoration:line-through;text-decoration-thickness:1px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin:34px 0 0}
-  .card{padding:26px;border-radius:16px;background:var(--surface);border:1px solid var(--hairline)}
+  .lead{margin:16px 0 0;max-width:640px;color:var(--ink-soft)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;margin:38px 0 0}
+  .card{padding:26px;border-radius:16px;background:var(--surface);border:1px solid var(--hairline);transition:transform .25s,box-shadow .25s}
+  .card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(60,45,20,.1)}
   .card h3{margin:0 0 8px;font-size:16px;font-weight:650}
   .card p{color:var(--ink-soft);font-size:14.5px}
-  .lead{margin:16px 0 0;max-width:660px;color:var(--ink-soft)}
+  .num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;margin:0 0 12px;border-radius:8px;background:color-mix(in oklab,var(--accent) 15%,#fff);color:var(--accent);font:600 12px/1 "Spline Sans Mono",monospace}
+
+  /* Two-column feature rows */
+  .row{display:grid;grid-template-columns:0.86fr 1.14fr;gap:56px;align-items:center}
+  /* Flipped rows put the figure first, so the wide column has to move with
+     it — otherwise the mock renders in the narrow half and the text in the
+     wide one, which is backwards. */
+  .row--flip{grid-template-columns:1.14fr 0.86fr}
+  .row--flip>figure{order:-1}
+  @media(max-width:900px){.row{grid-template-columns:1fr;gap:34px}.row--flip>figure{order:0}}
+
+  /* Library mock */
+  figure{margin:0}
+  .pane{padding:18px;border-radius:16px;background:var(--surface);background-image:var(--grain);
+    border:1px solid var(--hairline);box-shadow:0 16px 40px rgba(60,45,20,.13)}
+  .dayhead{display:flex;align-items:center;gap:11px;margin:0 0 14px}
+  .daychip{padding:4px 11px;border-radius:999px;background:#f0dfae;color:#5c4d24;font-size:11px;font-weight:650}
+  .daychip--alt{background:#dbe7d3;color:#3f5233}
+  .daymeta{font:500 10px "Spline Sans Mono",monospace;color:var(--ink-faint)}
+  .rule{flex:1;height:1px;background:var(--hairline-soft)}
+  .thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .thumb{display:grid;gap:7px}
+  .thumb .pic{position:relative;aspect-ratio:16/9;border-radius:9px;border:1px solid var(--hairline);overflow:hidden;
+    background:repeating-linear-gradient(45deg,#efe3c4 0 10px,#e7d8b2 10px 20px);transition:transform .25s}
+  .thumb:hover .pic{transform:scale(1.03)}
+  .thumb .pic--b{background:repeating-linear-gradient(45deg,#e0e7d5 0 10px,#d5dfc6 10px 20px)}
+  .thumb .pic--c{background:repeating-linear-gradient(45deg,#eeddd2 0 10px,#e5d1c3 10px 20px)}
+  .dur{position:absolute;right:7px;bottom:7px;padding:2px 7px;border-radius:6px;background:rgba(45,38,25,.8);color:#f6efdd;font:500 10px "Spline Sans Mono",monospace}
+  .trimmed{position:absolute;left:7px;top:7px;padding:2px 7px;border-radius:6px;background:var(--accent);color:#fff6ef;font:600 9px "Spline Sans Mono",monospace;letter-spacing:.06em}
+  .thumb strong{font-size:12.5px;font-weight:600}
+  .thumb small{display:block;font:500 10px "Spline Sans Mono",monospace;color:var(--ink-faint)}
+
+  /* Editor mock */
+  .ruler{display:flex;justify-content:space-between;margin:0 0 6px;font:500 9px "Spline Sans Mono",monospace;color:var(--ink-faint)}
+  .track{position:relative;height:56px;border-radius:10px;border:1px solid var(--hairline);
+    background:repeating-linear-gradient(90deg,#e8dcc4 0 46px,#ded1b5 46px 48px)}
+  .dim{position:absolute;top:0;bottom:0;background:rgba(243,236,218,.78)}
+  .cut{position:absolute;top:0;bottom:0;left:56%;width:14%;display:grid;place-items:center;
+    background:repeating-linear-gradient(-45deg,rgba(176,90,68,.16) 0 7px,rgba(176,90,68,.05) 7px 14px);
+    border-left:1.5px dashed var(--warn);border-right:1.5px dashed var(--warn)}
+  .cut span{padding:2px 7px;border-radius:6px;background:var(--surface);border:1px solid rgba(176,90,68,.35);color:#b05a44;font:600 9px "Spline Sans Mono",monospace}
+  .handle{position:absolute;top:-3px;bottom:-3px;width:13px;margin-left:-6.5px;border-radius:7px;background:var(--accent);box-shadow:0 2px 8px color-mix(in oklab,var(--accent) 40%,transparent)}
+  .playhead{position:absolute;top:-7px;bottom:-7px;width:2px;background:var(--ink);animation:scan 6s linear infinite}
+  @keyframes scan{0%{left:8%}100%{left:92%}}
+  .tools{display:flex;gap:8px;margin:16px 0 0;flex-wrap:wrap}
+  .tool{padding:7px 12px;border-radius:15px;background:var(--raised);border:1px solid var(--hairline);font-size:11.5px;font-weight:600;color:var(--ink-soft)}
+  .tool--go{margin-left:auto;background:var(--accent);border-color:transparent;color:#fff8f2}
+  .lossless{display:inline-flex;align-items:center;gap:7px;margin:14px 0 0;font:500 9.5px "Spline Sans Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:#7d9070}
+  .lossless i{width:5px;height:5px;border-radius:50%;background:var(--health)}
 
   /* Dark band */
-  .band{margin:120px 0 0;padding:84px 0;background:var(--dark);background-image:var(--grain);color:var(--paper-on-dark);text-align:center}
-  .band h2{color:var(--paper-on-dark);max-width:620px;margin:0 auto}
-  .band p{margin:18px auto 0;max-width:560px;color:#9a8f7a;font-size:15px}
+  .band{margin:130px 0 0;padding:92px 0;background:var(--dark);background-image:var(--grain);color:var(--paper-on-dark);text-align:center}
+  .band h2{color:var(--paper-on-dark);max-width:640px;margin:0 auto}
+  .band p{margin:18px auto 0;max-width:570px;color:#9a8f7a;font-size:15px}
   .band a{color:var(--health)}
+  .pills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:30px 0 0}
+  .pill{padding:8px 15px;border-radius:999px;border:1px solid rgba(236,228,210,.16);font:500 11px "Spline Sans Mono",monospace;color:#b3a98f}
 
-  /* Download */
-  #download{padding:110px 0 40px;text-align:center}
+  #download{padding:120px 0 40px;text-align:center}
   .req{margin:22px auto 0;display:inline-flex;gap:8px;align-items:center;padding:8px 16px;border-radius:999px;background:var(--surface);border:1px solid var(--hairline);color:var(--ink-muted);font:500 12px/1 "Spline Sans Mono",monospace}
   .req i{width:6px;height:6px;border-radius:50%;background:var(--health)}
-  .firstrun{max-width:560px;margin:44px auto 0;padding:24px 28px;border-radius:16px;background:var(--surface);border:1px solid var(--hairline);text-align:left}
+  .firstrun{max-width:580px;margin:44px auto 0;padding:24px 28px;border-radius:16px;background:var(--surface);border:1px solid var(--hairline);text-align:left}
   .firstrun h3{margin:0 0 10px;font-size:15px;font-weight:650}
   .firstrun p{color:var(--ink-soft);font-size:14px}
   .firstrun ol{margin:12px 0 0;padding-left:20px;color:var(--ink-soft);font-size:14px}
   .firstrun li{margin:6px 0}
-  footer{padding:60px 0 50px;text-align:center;color:var(--ink-faint);font-size:13px}
+  footer{padding:64px 0 54px;text-align:center;color:var(--ink-faint);font-size:13px}
   footer a{color:var(--ink-soft)}
-  @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important;scroll-behavior:auto}
+    [data-reveal]{opacity:1;transform:none}
+  }
 </style>
 </head>
 <body>
 
 <header class="wrap">
-  <svg class="mark" viewBox="0 0 1024 1024" aria-label="Encore">
+  <svg class="mark" viewBox="0 0 1024 1024" role="img" aria-label="Encore">
     <defs><linearGradient id="g" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="#8aab7c"/><stop offset="1" stop-color="#6b8b5f"/></linearGradient></defs>
     <rect x="96" y="96" width="832" height="832" rx="186" fill="url(#g)"/>
     <g fill="#fdfaf2">
@@ -109,16 +165,16 @@
       <rect x="640" y="414" width="96" height="308" rx="48"/>
     </g>
   </svg>
-  <p class="mono eyebrow">A replay buffer for your screen</p>
-  <h1>The moment already happened.</h1>
-  <p class="lede">Encore quietly keeps the last ten minutes of your screen. When the bug you can never reproduce finally shows up — press one key, and it's a file.</p>
-  <div class="cta">
+  <p class="mono eyebrow" data-reveal style="--rd:.05s">A replay buffer for your screen</p>
+  <h1 data-reveal style="--rd:.12s">The moment already happened.</h1>
+  <p class="lede" data-reveal style="--rd:.2s">Encore quietly keeps the last ten minutes of your screen. When the bug you can never reproduce finally shows up — press one key, and it's a file.</p>
+  <div class="cta" data-reveal style="--rd:.28s">
     <a class="btn" href="https://github.com/gisketch/encore/releases/latest/download/Encore-macOS-arm64.dmg">Download for macOS</a>
     <a class="btn btn--ghost" href="https://github.com/gisketch/encore">View source</a>
   </div>
-  <p class="fineprint">Free · open source · Apple Silicon · everything stays on your machine</p>
+  <p class="fineprint" data-reveal style="--rd:.34s">Free · open source · Apple Silicon · everything stays on your machine</p>
 
-  <div class="shot">
+  <div class="shot" data-reveal style="--rd:.42s">
     <div class="bar">
       <span class="chip" aria-hidden="true"><i style="height:9px"></i><i style="height:15px"></i><i style="height:11px"></i></span>
       <span class="dot" aria-hidden="true"></span>
@@ -130,46 +186,90 @@
 </header>
 
 <section class="wrap">
-  <p class="kicker">Why it's different</p>
-  <h2><span class="strike">Recorders make you press record</span><br>It's always been recording</h2>
-  <p class="lead">A rolling buffer holds the last five or ten minutes of your screen — nothing older is ever kept. Start it at login and forget it exists.</p>
+  <p class="kicker" data-reveal>Why it's different</p>
+  <h2 data-reveal style="--rd:.06s"><span class="strike">Recorders make you press record</span><br>It's always been recording</h2>
+  <p class="lead" data-reveal style="--rd:.12s">A rolling buffer holds the last five or ten minutes of your screen — nothing older is ever kept. Start it at login and forget it exists.</p>
   <div class="grid">
-    <div class="card"><h3>The bug shows up</h3><p>The flaky test fails. The UI glitches once in a hundred runs. The thing your bug report can't describe — it just did itself, on camera.</p></div>
-    <div class="card"><h3>You press one key</h3><p>The buffer becomes an MP4 in your library. Trim it, cut the dead air, copy it into the bug report. Done before the adrenaline fades.</p></div>
-    <div class="card"><h3>Nothing piles up</h3><p>Expired segments are deleted as they age out, so an all-day session costs about 250 MB of disk instead of a hard drive.</p></div>
+    <div class="card" data-reveal style="--rd:.06s"><span class="num">1</span><h3>The bug shows up</h3><p>The flaky test fails. The UI glitches once in a hundred runs. The thing your bug report can't describe — it just did itself, on camera.</p></div>
+    <div class="card" data-reveal style="--rd:.14s"><span class="num">2</span><h3>You press one key</h3><p>The buffer becomes an MP4 in your library. Trim it, cut the dead air, copy it into the bug report. Done before the adrenaline fades.</p></div>
+    <div class="card" data-reveal style="--rd:.22s"><span class="num">3</span><h3>Nothing piles up</h3><p>Expired segments are deleted as they age out, so an all-day session costs about 250 MB of disk instead of a hard drive.</p></div>
   </div>
 </section>
 
 <section class="wrap" id="library">
-  <p class="kicker">Library</p>
-  <h2>Every save, filed by day</h2>
-  <p class="lead">Replays land in a library, not a downloads folder. Thumbnails, durations, grouped by day — find Tuesday's glitch on Friday without scrubbing filenames. They're plain MP4 files on disk, so everything works with everything.</p>
+  <div class="row">
+    <div>
+      <p class="kicker" data-reveal>Library</p>
+      <h2 data-reveal style="--rd:.06s">Every save, filed by day</h2>
+      <p class="lead" data-reveal style="--rd:.12s">Replays land in a library, not a downloads folder. Thumbnails, durations, grouped by day — find Tuesday's glitch on Friday without scrubbing filenames.</p>
+      <p class="lead" data-reveal style="--rd:.18s">They're plain MP4 files on disk, so everything works with everything.</p>
+    </div>
+    <figure class="pane" data-reveal style="--rd:.1s">
+      <div class="dayhead"><span class="daychip">Today</span><span class="daymeta">4 replays · 310 MB</span><span class="rule"></span></div>
+      <div class="thumbs">
+        <div class="thumb"><div class="pic"><span class="dur">10:00</span></div><strong>4:32 PM</strong><small>10:00 · 96 MB</small></div>
+        <div class="thumb"><div class="pic pic--b"><span class="dur">4:12</span></div><strong>2:05 PM</strong><small>4:12 · 41 MB</small></div>
+        <div class="thumb"><div class="pic pic--c"><span class="trimmed">TRIMMED</span><span class="dur">1:34</span></div><strong>9:20 AM</strong><small>1:34 · 15 MB</small></div>
+      </div>
+      <div class="dayhead" style="margin:20px 0 14px"><span class="daychip daychip--alt">Yesterday</span><span class="daymeta">3 replays · 285 MB</span><span class="rule"></span></div>
+      <div class="thumbs">
+        <div class="thumb"><div class="pic pic--b"><span class="dur">10:00</span></div><strong>6:14 PM</strong><small>10:00 · 97 MB</small></div>
+        <div class="thumb"><div class="pic"><span class="dur">5:47</span></div><strong>3:41 PM</strong><small>5:47 · 55 MB</small></div>
+        <div class="thumb"><div class="pic pic--c"><span class="dur">10:00</span></div><strong>10:02 AM</strong><small>10:00 · 98 MB</small></div>
+      </div>
+    </figure>
+  </div>
 </section>
 
 <section class="wrap" id="editor">
-  <p class="kicker">Editor</p>
-  <h2>Trim the boring parts, keep the evidence</h2>
-  <p class="lead">Drag the handles, cut the middle, export. Cuts are lossless — Encore never re-encodes your video, so a ten-minute trim takes about a second and loses zero quality. MP4, GIF, or straight to the clipboard for your bug tracker.</p>
+  <div class="row row--flip">
+    <div>
+      <p class="kicker" data-reveal>Editor</p>
+      <h2 data-reveal style="--rd:.06s">Trim the boring parts, keep the evidence</h2>
+      <p class="lead" data-reveal style="--rd:.12s">Drag the handles, cut the middle, export. Cuts are lossless — Encore never re-encodes your video, so a ten-minute trim takes about a second and loses zero quality.</p>
+      <p class="lead" data-reveal style="--rd:.18s">MP4, GIF, or straight to the clipboard for your bug tracker.</p>
+      <p class="lossless" data-reveal style="--rd:.24s"><i aria-hidden="true"></i>lossless — no re-encode</p>
+    </div>
+    <figure class="pane" data-reveal style="--rd:.1s">
+      <div class="ruler"><span>0:00</span><span>2:30</span><span>5:00</span><span>7:30</span><span>10:00</span></div>
+      <div class="track">
+        <div class="dim" style="left:0;width:8%;border-radius:9px 0 0 9px"></div>
+        <div class="dim" style="right:0;width:6%;border-radius:0 9px 9px 0"></div>
+        <div class="cut"><span>CUT 0:58</span></div>
+        <div class="handle" style="left:8%"></div>
+        <div class="handle" style="left:94%"></div>
+        <div class="playhead"></div>
+      </div>
+      <div class="tools">
+        <span class="tool">Split at playhead</span>
+        <span class="tool">Remove segment</span>
+        <span class="tool tool--go">Export ⌘E</span>
+      </div>
+    </figure>
+  </div>
 </section>
 
 <div class="band">
   <div class="wrap">
-    <h2>Fully open source. Your screen never leaves your machine.</h2>
-    <p>No account. No cloud. No telemetry. Replays live in a folder you choose, and deleting one deletes it. And you don't have to take our word for it — <a href="https://github.com/gisketch/encore">every line of code is public</a>. That's the whole privacy policy.</p>
+    <h2 data-reveal>Fully open source. Your screen never leaves your machine.</h2>
+    <p data-reveal style="--rd:.1s">No account. No cloud. No telemetry. Replays live in a folder you choose, and deleting one deletes it. And you don't have to take our word for it — <a href="https://github.com/gisketch/encore">every line of code is public</a>. That's the whole privacy policy.</p>
+    <div class="pills" data-reveal style="--rd:.18s">
+      <span class="pill">no account</span><span class="pill">no telemetry</span><span class="pill">no network calls</span><span class="pill">MIT-spirited, GPL binaries</span>
+    </div>
   </div>
 </div>
 
 <section class="wrap" id="download">
-  <h2>The next rare bug is coming.</h2>
-  <p class="lede">Be recording when it does.</p>
-  <div class="cta">
+  <h2 data-reveal>The next rare bug is coming.</h2>
+  <p class="lede" data-reveal style="--rd:.08s">Be recording when it does.</p>
+  <div class="cta" data-reveal style="--rd:.16s">
     <a class="btn" href="https://github.com/gisketch/encore/releases/latest/download/Encore-macOS-arm64.dmg">Download for macOS</a>
   </div>
-  <p class="req"><i aria-hidden="true"></i>macOS 14 Sonoma or later · Apple Silicon</p>
+  <p class="req" data-reveal style="--rd:.22s"><i aria-hidden="true"></i>macOS 14 Sonoma or later · Apple Silicon</p>
 
-  <div class="firstrun">
+  <div class="firstrun" data-reveal style="--rd:.28s">
     <h3>Opening it the first time</h3>
-    <p>Encore isn't notarized by Apple yet, so macOS will say it "cannot be opened because the developer cannot be verified". That's expected for an unsigned build, not a sign of anything wrong.</p>
+    <p>Encore isn't notarized by Apple, so macOS will say it "cannot be opened because the developer cannot be verified". That's expected for an unsigned build, not a sign of anything wrong.</p>
     <ol>
       <li>Drag <strong>Encore</strong> into Applications.</li>
       <li><strong>Right-click</strong> it (or Control-click) and choose <strong>Open</strong>, then <strong>Open</strong> again in the dialog. macOS remembers the choice.</li>
@@ -182,5 +282,25 @@
   <p>Encore is free software. <a href="https://github.com/gisketch/encore">Source on GitHub</a>.</p>
 </footer>
 
+<script>
+  // Reveal on scroll. Elements start hidden only when this runs, so the page
+  // stays fully readable if JS never executes.
+  (function () {
+    var items = document.querySelectorAll('[data-reveal]');
+    if (!('IntersectionObserver' in window) ||
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      items.forEach(function (el) { el.classList.add('in'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('in');
+        io.unobserve(entry.target);
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    items.forEach(function (el) { io.observe(el); });
+  })();
+</script>
 </body>
 </html>
