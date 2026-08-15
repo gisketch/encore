@@ -14,8 +14,11 @@ jobs:
   check:
     # Apple Silicon: Encore's capture path is ScreenCaptureKit and its
     # sidecars are host-architecture only, so it is checked on the same
-    # platform it ships for rather than on Linux.
-    runs-on: macos-14
+    # platform it ships for rather than on Linux. macos-15 rather than
+    # macos-14 because a transitive dependency's Swift bridge uses Metal
+    # APIs (MTLResidencySet, MTLLogState) that only exist in the macOS 15
+    # SDK; on macos-14 it fails to compile.
+    runs-on: macos-15
     timeout-minutes: 45
 
     steps:
