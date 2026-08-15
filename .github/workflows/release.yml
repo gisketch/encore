@@ -47,10 +47,13 @@ jobs:
       - name: Prepare ffmpeg sidecars
         run: npm run prepare:ffmpeg-sidecars
 
-      # Signing is optional: with no certificate configured the bundler
-      # produces an ad-hoc signed app, which runs locally but is treated as
-      # unidentified by Gatekeeper and loses its Screen Recording grant on
-      # every rebuild. See docs/releasing.md.
+      # Signing is optional. GitHub substitutes an empty string for a secret
+      # that does not exist, and Tauri treats an empty APPLE_CERTIFICATE as
+      # "signing was requested" and then fails importing it — so the
+      # variables are unset explicitly when no certificate is configured,
+      # which produces an ad-hoc signed app instead. That app runs, but
+      # Gatekeeper calls it unidentified and macOS re-requests Screen
+      # Recording access after every update. See docs/releasing.md.
       - name: Build the macOS app
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
@@ -59,7 +62,16 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: npm run tauri build -- --bundles app,dmg
+        run: |
+          set -euo pipefail
+          if [ -z "${APPLE_CERTIFICATE:-}" ]; then
+            echo "No signing certificate configured — building unsigned."
+            unset APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY
+            unset APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID
+          else
+            echo "Signing with the configured Developer ID."
+          fi
+          npm run tauri build -- --bundles app,dmg
 
       - name: Report what was signed
         run: |
