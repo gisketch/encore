@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" width="44" height="44">
+  <!-- macOS menu bar icon. Deliberately monochrome black on transparent:
+       it is loaded as a template image, which macOS recolors for light and
+       dark menu bars and for the highlighted state. A colored icon cannot
+       do that and reads as a smudge at this size. Same 9 : 15 : 11 mark,
+       no body — menu bar icons are glyphs, not tiles. -->
+  <g fill="#000000">
+    <rect x="10" y="19.6" width="6" height="14.4" rx="3"/>
+    <rect x="19" y="10" width="6" height="24" rx="3"/>
+    <rect x="28" y="16.4" width="6" height="17.6" rx="3"/>
+  </g>
+</svg>

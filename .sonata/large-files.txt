@@ -1,1 +1,2 @@
 # repo-relative path<TAB>reason; keep exceptions narrow
+src-tauri/target/release/bundle/dmg/bundle_dmg.sh	Tauri bundler output, not source: written into the gitignored Rust target directory by `tauri build` and re-created on every bundle. The size check does not prune target/, so this is the sanctioned way to keep a release build from failing the harness.

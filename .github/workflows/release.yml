@@ -1,0 +1,91 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-14
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+
+      - name: Install dependencies
+        run: npm ci
+
+      # A tag that disagrees with the bundled version ships a DMG labelled
+      # with the wrong number, which is worse than a failed build.
+      - name: Check the tag matches the bundled version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          set -euo pipefail
+          config=$(node -p "require('./src-tauri/tauri.conf.json').version")
+          tag="${GITHUB_REF_NAME#v}"
+          if [ "$config" != "$tag" ]; then
+            echo "tag $GITHUB_REF_NAME does not match tauri.conf.json version $config" >&2
+            exit 1
+          fi
+          echo "version $config"
+
+      - name: Prepare ffmpeg sidecars
+        run: npm run prepare:ffmpeg-sidecars
+
+      # Signing is optional: with no certificate configured the bundler
+      # produces an ad-hoc signed app, which runs locally but is treated as
+      # unidentified by Gatekeeper and loses its Screen Recording grant on
+      # every rebuild. See docs/releasing.md.
+      - name: Build the macOS app
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: npm run tauri build -- --bundles app,dmg
+
+      - name: Report what was signed
+        run: |
+          set -euo pipefail
+          app="src-tauri/target/release/bundle/macos/Encore.app"
+          codesign -dv --verbose=2 "$app" 2>&1 | sed -n '1,12p' || true
+          if codesign -dv "$app" 2>&1 | grep -q "adhoc"; then
+            echo "::warning::Encore.app is ad-hoc signed — Gatekeeper will treat it as unidentified and macOS will re-request Screen Recording access after every update. Configure signing secrets to fix (docs/releasing.md)."
+          fi
+
+      - name: Upload the app bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: Encore-macos-aarch64
+          path: |
+            src-tauri/target/release/bundle/dmg/*.dmg
+            src-tauri/target/release/bundle/macos/*.app
+          if-no-files-found: error
+
+      - name: Publish the release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create "$GITHUB_REF_NAME" \
+            --title "Encore $GITHUB_REF_NAME" \
+            --generate-notes \
+            src-tauri/target/release/bundle/dmg/*.dmg

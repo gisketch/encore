@@ -1,6 +1,7 @@
 use crate::capture::{CaptureService, CaptureState, HotkeyId};
 use crate::hotkeys;
 use tauri::{
+    image::Image,
     menu::{IsMenuItem, Menu, MenuItem, PredefinedMenuItem},
     tray::{TrayIcon, TrayIconBuilder},
     AppHandle, Listener, Manager, Wry,
@@ -138,8 +139,11 @@ pub(crate) fn build(app: &mut tauri::App) -> tauri::Result<()> {
         .show_menu_on_left_click(true)
         .on_menu_event(handle_menu_event)
         .on_tray_icon_event(super::tray_click::handle);
-    if let Some(icon) = app.default_window_icon() {
-        tray = tray.icon(icon.clone());
+    // A template image: monochrome on transparent, which macOS recolors
+    // for light and dark menu bars and for the highlighted state. The full
+    // colour app icon cannot do that and reads as a smudge at menu bar size.
+    if let Ok(icon) = Image::from_bytes(include_bytes!("../../icons/tray.png")) {
+        tray = tray.icon(icon).icon_as_template(true);
     }
     let tray = tray.build(app)?;
     app.manage(TrayHandle(tray));
