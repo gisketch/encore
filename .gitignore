@@ -18,3 +18,6 @@ src-tauri/gen/schemas/
 
 # Claude worktrees
 .claude/worktrees/
+
+# Local tool state
+.serena/

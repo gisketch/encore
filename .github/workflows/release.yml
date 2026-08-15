@@ -70,6 +70,18 @@ jobs:
             echo "::warning::Encore.app is ad-hoc signed — Gatekeeper will treat it as unidentified and macOS will re-request Screen Recording access after every update. Configure signing secrets to fix (docs/releasing.md)."
           fi
 
+      # The landing page links to a fixed filename, so the versioned DMG is
+      # copied to a stable name. `releases/latest/download/<name>` only
+      # resolves for an exact asset name, so this is what keeps the site's
+      # download button working across every future release without a
+      # redeploy.
+      - name: Name the DMG for a stable download URL
+        run: |
+          set -euo pipefail
+          src=$(ls src-tauri/target/release/bundle/dmg/*.dmg | head -1)
+          cp "$src" "src-tauri/target/release/bundle/dmg/Encore-macOS-arm64.dmg"
+          ls -la src-tauri/target/release/bundle/dmg/
+
       - name: Upload the app bundle
         uses: actions/upload-artifact@v4
         with:

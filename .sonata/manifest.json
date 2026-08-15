@@ -3,17 +3,29 @@
   "templateVersion": "0.4.0",
   "project": "encore",
   "agents": [
-    "codex"
+    "codex",
+    "claude"
   ],
   "createdBy": "sonata",
   "createdAt": "2026-08-12",
-  "updatedAt": "2026-08-12T09:05:22Z",
+  "updatedAt": "2026-08-13T00:00:00Z",
   "setup": {
     "status": "ready",
     "version": 1,
     "completedAt": "2026-08-12T09:05:22Z"
   },
   "files": {
+    ".claude/skills/sonata-audit/SKILL.md": "6488535401b723c68381b669370759a1b21233e10653460fabdde355c4de331e",
+    ".claude/skills/sonata-fix/SKILL.md": "ea7a43dd4cb5847f15d29e6571a34bc6c8b480014bc4d9429ec031af97552185",
+    ".claude/skills/sonata-grill/SKILL.md": "4b6b6bc09d2765f336f36a497f0e7abcf1a0e427a78ff074bb9d351676a69083",
+    ".claude/skills/sonata-implement/SKILL.md": "a3ad15961aaef1b4e9acba09b85ead543c6ced85926b49c42da6a443707b19b1",
+    ".claude/skills/sonata-retrofit/SKILL.md": "b6697aa904799c66dac26965569e703cf6d0fe695b911a1bc6a1db8ade55e87b",
+    ".claude/skills/sonata-review/SKILL.md": "2110cdb5cebe23fed85a2718d91a125411644d73dc41f949def19587925cb0a2",
+    ".claude/skills/sonata-setup/SKILL.md": "f49aea5ca351017ae23a2ec260b9f7b4d6db26a4c977e94c6e540e55adae85a3",
+    ".claude/skills/sonata-spec/SKILL.md": "08a1605bb7fdd7dbed459c2c057ee4122b54cbf5232eb84917f3888069c075e2",
+    ".claude/skills/sonata-tickets/SKILL.md": "9d19656efe2628c6ed5c108903785b8c26873cb2173cbcf0b5b1066dfc256191",
+    ".claude/skills/sonata-upgrade/SKILL.md": "1b79d709b168ad45ac04f8f0319c401409da47c3cfd150af0c60c43060d433de",
+    ".claude/skills/sonata-work/SKILL.md": "5572dc1d9a40bca2ba064d658cbac7dad8f26d64575559d9d820e1de9367f89c",
     ".agents/skills/sonata-audit/agents/openai.yaml": "5a33b7150dfbf5045bb799d84e9abb50fd1c25c8275ae4f6abdf004990b2115c",
     ".agents/skills/sonata-audit/SKILL.md": "6488535401b723c68381b669370759a1b21233e10653460fabdde355c4de331e",
     ".agents/skills/sonata-fix/agents/openai.yaml": "599ad6fb9ed69de916da1a53735de2e106be02c45ec6e90f7acf4f9dd16f2047",
@@ -73,6 +85,7 @@
     ".sonata/quality-gates.json",
     ".sonata/skylos.toml",
     "AGENTS.md",
+    "CLAUDE.md",
     "README.md",
     "docs/architecture/index.md",
     "docs/core-beliefs.md",

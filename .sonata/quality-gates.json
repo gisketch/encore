@@ -1,9 +1,24 @@
 {
   "schema": 1,
   "scc": {
-    "enabled": false,
+    "enabled": true,
     "version": "3.7.0",
-    "thresholds": {}
+    "thresholds": {
+      "Markdown": 1,
+      "YAML": 1,
+      "Rust": 39,
+      "JSON": 1,
+      "JavaScript": 21,
+      "TOML": 1,
+      "CSS": 1,
+      "SVG": 1,
+      "Shell": 17,
+      "TypeScript": 1,
+      "HTML": 1,
+      "Plain Text": 1,
+      "Svelte": 13,
+      "Objective C": 16
+    }
   },
   "skylos": {
     "enabled": false,

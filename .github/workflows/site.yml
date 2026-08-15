@@ -1,0 +1,60 @@
+name: Site
+
+# The landing page is one self-contained file, so deploying it is a copy.
+# It ships on every push that touches it, independently of app releases —
+# the download button points at `releases/latest/download/...`, which
+# resolves to whatever the newest release is without the page changing.
+on:
+  push:
+    branches: [main]
+    paths:
+      - landing-page.html
+      - .github/workflows/site.yml
+  workflow_dispatch:
+
+concurrency:
+  group: site
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Skips cleanly on forks and before the secrets exist, rather than
+    # failing every push with an SSH error.
+    if: ${{ vars.SITE_ENABLED == 'true' }}
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Publish to the VPS
+        env:
+          SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          HOST: ${{ secrets.VPS_HOST }}
+          USER: ${{ secrets.VPS_USER }}
+          PORT: ${{ secrets.VPS_PORT || '22' }}
+          TARGET: ${{ secrets.VPS_SITE_PATH }}
+        run: |
+          set -euo pipefail
+          install -m 600 /dev/null key
+          printf '%s\n' "$SSH_KEY" > key
+          ssh-keyscan -p "$PORT" -H "$HOST" >> known_hosts 2>/dev/null
+          # Upload beside the live file, then move into place, so a dropped
+          # connection can never leave a half-written page being served.
+          scp -i key -P "$PORT" -o UserKnownHostsFile=known_hosts \
+            landing-page.html "$USER@$HOST:$TARGET/.index.html.incoming"
+          ssh -i key -p "$PORT" -o UserKnownHostsFile=known_hosts "$USER@$HOST" \
+            "mv '$TARGET/.index.html.incoming' '$TARGET/index.html'"
+          rm -f key known_hosts
+
+      - name: Verify the site is serving the new page
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            if curl -fsS https://encore.gisketch.com/ | grep -q "The moment already happened"; then
+              echo "encore.gisketch.com is serving the current page"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::warning::Deployed, but encore.gisketch.com did not serve the expected content — check nginx root and DNS."
