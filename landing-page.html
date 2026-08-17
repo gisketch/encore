@@ -21,6 +21,7 @@
     --ink-faint:#a3987f; --paper:#f3ecda; --surface:#faf6ec; --raised:#fffdf6;
     --inset:#f3ecda; --hairline:rgba(70,58,35,.14); --hairline-soft:rgba(70,58,35,.09);
     --dark:#262019; --paper-on-dark:#ece4d2; --health:#93b28a; --warn:#c07a5e;
+    --gap:112px;  /* one vertical rhythm for every section boundary */
     --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E");
   }
   *{margin:0;padding:0;box-sizing:border-box}
@@ -40,7 +41,7 @@
   .js [data-reveal].in{opacity:1;transform:none}
 
   /* Hero */
-  header{padding:152px 0 0;text-align:center;margin-bottom:176px}
+  header{padding-block-start:104px;text-align:center}
   .mark{width:78px;height:78px;display:block;margin:0 auto 30px;filter:drop-shadow(0 12px 26px rgba(60,45,20,.2));animation:rise .9s cubic-bezier(.2,.7,.3,1) both}
   @keyframes rise{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
   .eyebrow{color:var(--ink-muted)}
@@ -72,8 +73,7 @@
   .save kbd{font:600 9px/1 "Spline Sans Mono",monospace;color:rgba(255,244,235,.78)}
   .caption{margin:16px 0 0;text-align:center;color:var(--ink-faint);font-size:13px}
 
-  section{padding:0;margin-top:180px}
-  section + section{padding-top:0;margin-top:228px}
+  section{padding:0;margin-block-start:var(--gap)}
   h2{font-size:clamp(26px,3.3vw,35px);line-height:1.2}
   .kicker{color:var(--accent);font-weight:600;font-size:13px;letter-spacing:.04em;margin:0 0 14px}
   .strike{color:var(--ink-faint);text-decoration:line-through;text-decoration-thickness:1px}
@@ -134,14 +134,14 @@
   .lossless i{width:5px;height:5px;border-radius:50%;background:var(--health)}
 
   /* Dark band */
-  .band{margin:244px 0 0;padding:140px 0;background:var(--dark);background-image:var(--grain);color:var(--paper-on-dark);text-align:center}
+  .band{margin-block-start:var(--gap);padding-block:96px;background:var(--dark);background-image:var(--grain);color:var(--paper-on-dark);text-align:center}
   .band h2{color:var(--paper-on-dark);max-width:640px;margin:0 auto}
   .band p{margin:18px auto 0;max-width:570px;color:#9a8f7a;font-size:15px}
   .band a{color:var(--health)}
   .pills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:30px 0 0}
   .pill{padding:8px 15px;border-radius:999px;border:1px solid rgba(236,228,210,.16);font:500 11px "Spline Sans Mono",monospace;color:#b3a98f}
 
-  #download{margin-top:228px;padding:0 0 120px;text-align:center}
+  #download{margin-block-start:var(--gap);padding:0;text-align:center}
   .req{margin:22px auto 0;display:inline-flex;gap:8px;align-items:center;padding:8px 16px;border-radius:999px;background:var(--surface);border:1px solid var(--hairline);color:var(--ink-muted);font:500 12px/1 "Spline Sans Mono",monospace}
   .req i{width:6px;height:6px;border-radius:50%;background:var(--health)}
   .firstrun{max-width:580px;margin:44px auto 0;padding:24px 28px;border-radius:16px;background:var(--surface);border:1px solid var(--hairline);text-align:left}
@@ -149,23 +149,23 @@
   .firstrun p{color:var(--ink-soft);font-size:14px}
   .firstrun ol{margin:12px 0 0;padding-left:20px;color:var(--ink-soft);font-size:14px}
   .firstrun li{margin:6px 0}
-  footer{margin-top:160px;padding:96px 0 112px;text-align:center;color:var(--ink-faint);font-size:13px}
+  footer{margin-block-start:var(--gap);padding-block:0 64px;text-align:center;color:var(--ink-faint);font-size:13px}
   footer a{color:var(--ink-soft)}
 
   @media(max-width:600px){
+    :root{--gap:72px}
     .wrap{padding-inline:22px}
-    header{padding:84px 0 0;margin-bottom:112px}
-    section,section + section{padding-top:0;margin-top:112px}
-    section + section{margin-top:136px}
+    header{padding-block-start:72px}
+
     .shot{margin-top:62px}
     .bar{align-items:flex-start;padding:12px;gap:9px}
     .barcopy small{font-size:9px}
     .save{margin-left:auto;padding:0 11px;font-size:11px}
     .row{gap:42px}
     .grid{gap:16px;margin-top:36px}
-    .band{margin-top:136px;padding:78px 0}
-    #download{margin-top:136px;padding:0 0 54px}
-    footer{margin-top:112px;padding:70px 0 72px}
+    .band{padding-block:72px}
+
+    footer{padding-block:0 48px}
   }
 
   @media (prefers-reduced-motion:reduce){
