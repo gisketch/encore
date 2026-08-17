@@ -11,6 +11,7 @@
 <meta property="og:url" content="https://encore.gisketch.com/">
 <meta name="theme-color" content="#f3ecda">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%237a9b6d'/%3E%3Cg fill='%23fdfaf2'%3E%3Crect x='17' y='29' width='7' height='16' rx='3.5'/%3E%3Crect x='28.5' y='18' width='7' height='27' rx='3.5'/%3E%3Crect x='40' y='25' width='7' height='20' rx='3.5'/%3E%3C/g%3E%3C/svg%3E">
+<script>document.documentElement.classList.add('js')</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&family=Young+Serif&display=swap" rel="stylesheet">
@@ -28,12 +29,15 @@
     font:400 16px/1.6 "Instrument Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
   h1,h2{font-family:"Young Serif",Georgia,serif;font-weight:400;letter-spacing:-.015em;text-wrap:balance}
   a{color:inherit}
-  .wrap{max-width:1120px;margin:0 auto;padding:0 40px}
+  /* Horizontal only. The `padding` shorthand here beats `header`/`section`
+     on specificity (0,1,0 against 0,0,1) and silently deletes their
+     vertical padding — the hero's own 152px top padding never applied. */
+  .wrap{max-width:1120px;margin-inline:auto;padding-inline:40px}
   .mono{font:500 11px/1 "Spline Sans Mono",ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase}
 
   /* Scroll reveal */
-  [data-reveal]{opacity:0;transform:translateY(18px);transition:opacity .7s cubic-bezier(.2,.7,.3,1),transform .7s cubic-bezier(.2,.7,.3,1);transition-delay:var(--rd,0s)}
-  [data-reveal].in{opacity:1;transform:none}
+  .js [data-reveal]{opacity:0;transform:translateY(18px);transition:opacity .7s cubic-bezier(.2,.7,.3,1),transform .7s cubic-bezier(.2,.7,.3,1);transition-delay:var(--rd,0s)}
+  .js [data-reveal].in{opacity:1;transform:none}
 
   /* Hero */
   header{padding:152px 0 0;text-align:center;margin-bottom:176px}
@@ -149,7 +153,7 @@
   footer a{color:var(--ink-soft)}
 
   @media(max-width:600px){
-    .wrap{padding:0 22px}
+    .wrap{padding-inline:22px}
     header{padding:84px 0 0;margin-bottom:112px}
     section,section + section{padding-top:0;margin-top:112px}
     section + section{margin-top:136px}
@@ -166,7 +170,7 @@
 
   @media (prefers-reduced-motion:reduce){
     *{animation:none!important;transition:none!important;scroll-behavior:auto}
-    [data-reveal]{opacity:1;transform:none}
+    .js [data-reveal]{opacity:1;transform:none}
   }
 </style>
 </head>
@@ -300,23 +304,54 @@
 </footer>
 
 <script>
-  // Reveal on scroll. Elements start hidden only when this runs, so the page
-  // stays fully readable if JS never executes.
+  // Reveal on scroll.
+  //
+  // A deterministic position check rather than IntersectionObserver. The
+  // observer samples at frame boundaries, so an element that crosses the
+  // viewport between two frames -- a fast scroll, an anchor jump, a
+  // restored scroll position -- is never reported and stays invisible for
+  // good. Measured 5 of 31 elements revealed after scrolling the whole
+  // page that way; entire sections were missing. This re-checks on every
+  // scroll and resize, so an element can only be revealed late, never
+  // skipped.
   (function () {
-    var items = document.querySelectorAll('[data-reveal]');
-    if (!('IntersectionObserver' in window) ||
-        window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var items = [].slice.call(document.querySelectorAll('[data-reveal]'));
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function revealAll() {
       items.forEach(function (el) { el.classList.add('in'); });
-      return;
+      items = [];
     }
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add('in');
-        io.unobserve(entry.target);
+
+    if (reduced) { revealAll(); return; }
+
+    var ticking = false;
+    function check() {
+      ticking = false;
+      var limit = window.innerHeight + 120;   // reveal just before entry
+      items = items.filter(function (el) {
+        if (el.getBoundingClientRect().top > limit) return true;
+        el.classList.add('in');
+        return false;
       });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
-    items.forEach(function (el) { io.observe(el); });
+      if (!items.length) {
+        window.removeEventListener('scroll', onScroll);
+        window.removeEventListener('resize', onScroll);
+      }
+    }
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(check);
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    window.addEventListener('load', check);
+    check();
+
+    // Backstop: invisible content is a worse failure than a late animation.
+    setTimeout(revealAll, 4000);
   })();
 </script>
 </body>
